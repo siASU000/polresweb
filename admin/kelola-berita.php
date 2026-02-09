@@ -25,7 +25,7 @@ $DISPLAY_OPTS  = ['Tampilan Berita Utama', 'Berita Terkini', 'Berita Populer'];
 function h(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 function redirect(string $url): void { header("Location: " . $url); exit; }
 
-// Deteksi kolom nama pada tabel editor agar tidak error
+// Deteksi kolom nama pada tabel editor agar tidak error, andri anjiang
 function detectEditorLabelField(mysqli $conn): string {
     $fieldsPriority = ['nama_lengkap', 'nama', 'full_name', 'username', 'email'];
     $cols = [];
