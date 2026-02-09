@@ -18,7 +18,6 @@ function h(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8')
 $uploadDir = __DIR__ . '/../uploads/galeri/';
 $uploadBase = 'uploads/galeri/'; // untuk dipakai di <img src="">
 if (!is_dir($uploadDir)) {
-  // coba buat otomatis
   @mkdir($uploadDir, 0775, true);
 }
 
@@ -89,11 +88,9 @@ function deletePhysicalFile(string $absPath): void {
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
 /* ==========================
-   HANDLE ACTIONS
+    HANDLE ACTIONS
 ========================== */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-  // 1) Tambah galeri (upload)
   if ($action === 'create') {
     $judul = trim((string)($_POST['judul'] ?? ''));
     $deskripsi = trim((string)($_POST['deskripsi'] ?? ''));
@@ -103,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($judul === '') {
       $flash['err'] = "Judul wajib diisi.";
-    } elseif (!isset($_FILES['gambar'])) {
+    } elseif (!isset($_FILES['gambar']) || $_FILES['gambar']['error'] === UPLOAD_ERR_NO_FILE) {
       $flash['err'] = "File gambar wajib diupload.";
     } else {
       $err = '';
@@ -114,15 +111,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $mime = $finfo->file($tmp);
         $ext = ['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp'][$mime];
-
         $filename = makeSafeFilename($ext);
         $dest = $uploadDir . $filename;
 
         if (!@move_uploaded_file($tmp, $dest)) {
-          $flash['err'] = "Gagal menyimpan file ke server. Cek permission folder uploads/galeri.";
+          $flash['err'] = "Gagal menyimpan file ke server.";
         } else {
-          $stmt = $conn->prepare("INSERT INTO galeri (judul, deskripsi, gambar, alt_text, is_active, urutan)
-                                  VALUES (?,?,?,?,?,?)");
+          $stmt = $conn->prepare("INSERT INTO galeri (judul, deskripsi, gambar, alt_text, is_active, urutan) VALUES (?,?,?,?,?,?)");
           if (!$stmt) {
             deletePhysicalFile($dest);
             $flash['err'] = "Prepare query gagal: " . $conn->error;
@@ -141,7 +136,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
   }
 
-  // 2) Toggle aktif/nonaktif
   if ($action === 'toggle') {
     $id = (int)($_POST['id'] ?? 0);
     $to = (int)($_POST['to'] ?? 0);
@@ -152,15 +146,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $stmt->close();
         $flash['ok'] = "Status galeri berhasil diubah.";
-      } else {
-        $flash['err'] = "Query gagal: " . $conn->error;
       }
-    } else {
-      $flash['err'] = "ID tidak valid.";
     }
   }
 
-  // 3) Update urutan
   if ($action === 'order') {
     $id = (int)($_POST['id'] ?? 0);
     $urutan = (int)($_POST['urutan'] ?? 0);
@@ -171,19 +160,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $stmt->close();
         $flash['ok'] = "Urutan berhasil diperbarui.";
-      } else {
-        $flash['err'] = "Query gagal: " . $conn->error;
       }
-    } else {
-      $flash['err'] = "ID tidak valid.";
     }
   }
 
-  // 4) Hapus galeri (hapus file + row)
   if ($action === 'delete') {
     $id = (int)($_POST['id'] ?? 0);
     if ($id > 0) {
-      // ambil nama file dulu
       $stmt = $conn->prepare("SELECT gambar FROM galeri WHERE id=? LIMIT 1");
       if ($stmt) {
         $stmt->bind_param("i", $id);
@@ -199,26 +182,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($del) {
           $del->bind_param("i", $id);
           if ($del->execute()) {
-            // hapus file fisik setelah row terhapus
             deletePhysicalFile($abs);
             $flash['ok'] = "Galeri berhasil dihapus.";
-          } else {
-            $flash['err'] = "Hapus data gagal: " . $del->error;
           }
           $del->close();
-        } else {
-          $flash['err'] = "Query gagal: " . $conn->error;
         }
-      } else {
-        $flash['err'] = "Query gagal: " . $conn->error;
       }
-    } else {
-      $flash['err'] = "ID tidak valid.";
     }
   }
 }
 
-// data list
 $items = fetchGaleri($conn);
 ?>
 <!DOCTYPE html>
@@ -228,204 +201,235 @@ $items = fetchGaleri($conn);
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kelola Galeri - Admin Polresta Padang</title>
   <link rel="stylesheet" href="admin.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    .alert { padding: 12px 14px; border-radius: 10px; margin: 12px 0 18px; font-weight: 600; }
-    .alert.ok { background: #e9fff0; border: 1px solid #b6f2c8; color: #0d6a2b; }
-    .alert.err { background: #fff0f0; border: 1px solid #ffb8b8; color: #8a0d0d; }
-
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-    @media (max-width: 900px){ .grid-2 { grid-template-columns: 1fr; } }
-
-    .card { background: #fff; border-radius: 14px; padding: 18px; border: 1px solid #eaeaea; }
-    .card h3 { margin-bottom: 10px; }
-
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media (max-width: 700px){ .form-row { grid-template-columns: 1fr; } }
-
-    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
-    .field label { font-weight: 600; font-size: 13px; color: #222; }
-    .field input[type="text"],
-    .field input[type="number"],
-    .field textarea {
-      width: 100%;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 10px 12px;
-      outline: none;
+    :root {
+      --primary: #1f2c7d;
+      --accent: #f1c40f;
+      --bg: #f4f7f6;
+      --text: #333;
+      --success: #0d6a2b;
+      --danger: #b71c1c;
     }
-    .field textarea { min-height: 90px; resize: vertical; }
 
-    .btn { padding: 10px 14px; border-radius: 10px; border: 1px solid #ccc; cursor: pointer; font-weight: 700; background: #fff; }
-    .btn.primary { background: #1f2c7d; border-color: #1f2c7d; color: #fff; }
-    .btn.danger { background: #b71c1c; border-color: #b71c1c; color: #fff; }
-    .btn.small { padding: 8px 10px; border-radius: 10px; font-weight: 700; font-size: 12px; }
+    body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); }
+    
+    .admin-shell { max-width: 1400px; margin: 0 auto; padding: 20px; }
+    
+    /* Header Stying */
+    .header-panel { 
+      background: white; 
+      padding: 25px; 
+      border-radius: 15px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+      margin-bottom: 30px;
+    }
+    .header-panel h1 { font-size: 24px; font-weight: 700; color: var(--primary); margin: 0; }
 
-    .table { width: 100%; border-collapse: collapse; }
-    .table th, .table td { padding: 12px 10px; border-bottom: 1px solid #eee; vertical-align: top; }
-    .table th { text-align: left; font-size: 12px; letter-spacing: .3px; text-transform: uppercase; color: #444; }
-    .thumb { width: 120px; height: 80px; object-fit: cover; border-radius: 10px; border: 1px solid #eee; background: #f5f5f5; display:block; }
-    .badge { display:inline-block; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; }
-    .badge.on { background:#e7fff0; border:1px solid #b6f2c8; color:#0d6a2b; }
-    .badge.off { background:#fff1e7; border:1px solid #ffd2b6; color:#7a2a00; }
+    /* Alerts */
+    .alert { padding: 15px; border-radius: 12px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; font-weight: 500; }
+    .alert.ok { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .alert.err { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
-    .actions { display:flex; flex-wrap:wrap; gap:8px; }
-    .inline { display:inline-flex; gap:8px; align-items:center; }
-    .muted { color:#666; font-size:12px; }
+    .main-grid { display: grid; grid-template-columns: 380px 1fr; gap: 30px; }
+    @media (max-width: 1100px) { .main-grid { grid-template-columns: 1fr; } }
+
+    /* Cards */
+    .card { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); height: fit-content; }
+    .card h3 { margin: 0 0 20px 0; font-size: 18px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+
+    /* Forms */
+    .field { margin-bottom: 20px; }
+    .field label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: #555; }
+    .field input[type="text"], .field input[type="number"], .field textarea, .field input[type="file"] {
+      width: 100%; padding: 12px; border: 1.5px solid #eee; border-radius: 10px; font-family: inherit; transition: 0.3s;
+    }
+    .field input:focus, .field textarea:focus { border-color: var(--primary); outline: none; background: #fcfdff; }
+    
+    .btn { 
+      display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; 
+      border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px; 
+      transition: 0.3s; border: none; text-decoration: none;
+    }
+    .btn.primary { background: var(--primary); color: white; width: 100%; justify-content: center; }
+    .btn.primary:hover { opacity: 0.9; transform: translateY(-2px); }
+    .btn.outline { background: white; border: 1.5px solid #ddd; color: #555; }
+    .btn.outline:hover { background: #f9f9f9; }
+    .btn.danger { background: #fff5f5; color: var(--danger); }
+    .btn.danger:hover { background: var(--danger); color: white; }
+    .btn.small { padding: 6px 12px; font-size: 12px; }
+
+    /* Table Styling */
+    .table-container { overflow-x: auto; }
+    .table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+    .table th { padding: 15px; font-size: 12px; text-transform: uppercase; color: #888; text-align: left; }
+    .table td { padding: 15px; background: #fff; vertical-align: middle; border-top: 1px solid #f9f9f9; border-bottom: 1px solid #f9f9f9; }
+    .table td:first-child { border-left: 1px solid #f9f9f9; border-radius: 12px 0 0 12px; }
+    .table td:last-child { border-right: 1px solid #f9f9f9; border-radius: 0 12px 12px 0; }
+    .table tr:hover td { background: #fcfcfc; }
+
+    .thumb-wrapper { position: relative; width: 100px; height: 70px; border-radius: 8px; overflow: hidden; border: 1px solid #eee; }
+    .thumb { width: 100%; height: 100%; object-fit: cover; }
+    
+    .badge { padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; display: inline-block; }
+    .badge.on { background: #e8f5e9; color: var(--success); }
+    .badge.off { background: #fff3e0; color: #e65100; }
+
+    .action-group { display: flex; gap: 10px; }
+    .order-input { width: 60px; padding: 5px; border-radius: 6px; border: 1px solid #ddd; text-align: center; }
+    .muted { color: #888; font-size: 12px; }
   </style>
 </head>
 
-<body class="admin-dashboard-page">
-  <main class="admin-shell">
-    <section class="admin-card">
-      <div class="admin-header">
-        <div>
-          <h1 style="margin:0;">Kelola Galeri</h1>
-          <p class="muted" style="margin:6px 0 0;">Upload foto galeri, atur urutan, dan aktif/nonaktif tampilan di halaman publik.</p>
-        </div>
-        <div class="actions">
-          <a class="btn" href="dashboard.php">← Kembali</a>
-          <a class="btn" href="../galeri.php" target="_blank" rel="noopener">Lihat Galeri Publik</a>
-        </div>
+<body>
+  <div class="admin-shell">
+    <header class="header-panel">
+      <div>
+        <h1><i class="fas fa-images"></i> Manajemen Galeri</h1>
+        <p class="muted">Atur publikasi foto kegiatan Polresta Padang</p>
       </div>
+      <div class="action-group">
+        <a class="btn outline" href="dashboard.php"><i class="fas fa-arrow-left"></i> Dashboard</a>
+        <a class="btn outline" href="../galeri.php" target="_blank"><i class="fas fa-external-link-alt"></i> Lihat Web</a>
+      </div>
+    </header>
 
-      <?php if ($flash['ok']): ?>
-        <div class="alert ok"><?= h($flash['ok']) ?></div>
-      <?php endif; ?>
-      <?php if ($flash['err']): ?>
-        <div class="alert err"><?= h($flash['err']) ?></div>
-      <?php endif; ?>
+    <?php if ($flash['ok']): ?>
+      <div class="alert ok"><i class="fas fa-check-circle"></i> <?= h($flash['ok']) ?></div>
+    <?php endif; ?>
+    <?php if ($flash['err']): ?>
+      <div class="alert err"><i class="fas fa-exclamation-triangle"></i> <?= h($flash['err']) ?></div>
+    <?php endif; ?>
 
-      <div class="grid-2">
-        <!-- FORM UPLOAD -->
+    <div class="main-grid">
+      <aside>
         <div class="card">
-          <h3>Tambah Foto Galeri</h3>
+          <h3><i class="fas fa-plus-circle"></i> Tambah Foto</h3>
           <form method="post" enctype="multipart/form-data">
             <input type="hidden" name="action" value="create">
 
             <div class="field">
-              <label>Judul *</label>
-              <input type="text" name="judul" required maxlength="160" placeholder="Contoh: Kegiatan Patroli / Apel / Sosialisasi">
+              <label>Judul Dokumentasi *</label>
+              <input type="text" name="judul" required placeholder="Contoh: Operasi Lilin Singgalang">
             </div>
 
             <div class="field">
-              <label>Deskripsi (opsional)</label>
-              <textarea name="deskripsi" placeholder="Tulis deskripsi singkat..."></textarea>
+              <label>Keterangan Singkat</label>
+              <textarea name="deskripsi" placeholder="Jelaskan sedikit tentang foto ini..."></textarea>
             </div>
 
-            <div class="form-row">
+            <div style="display:grid; grid-template-columns: 1fr 80px; gap:10px;">
               <div class="field">
-                <label>Alt Text (opsional)</label>
-                <input type="text" name="alt_text" maxlength="180" placeholder="Contoh: Dokumentasi kegiatan Polresta Padang">
+                <label>Alt Text (SEO)</label>
+                <input type="text" name="alt_text" placeholder="Deskripsi untuk tuna netra">
               </div>
               <div class="field">
-                <label>Urutan (opsional)</label>
-                <input type="number" name="urutan" value="0" min="0" step="1">
+                <label>Urutan</label>
+                <input type="number" name="urutan" value="0">
               </div>
             </div>
 
             <div class="field">
-              <label>Gambar * (JPG/PNG/WEBP, maks 4MB)</label>
+              <label>File Gambar (Rekomendasi 4:3)</label>
               <input type="file" name="gambar" accept=".jpg,.jpeg,.png,.webp" required>
+              <small class="muted">Maksimal file 4MB (JPG, PNG, WEBP)</small>
             </div>
 
-            <div class="field inline">
-              <input type="checkbox" id="is_active" name="is_active" checked>
-              <label for="is_active" style="margin:0;">Tampilkan (aktif)</label>
+            <div class="field" style="display:flex; align-items:center; gap:10px; background:#f9f9f9; padding:10px; border-radius:10px;">
+              <input type="checkbox" id="is_active" name="is_active" checked style="width:18px; height:18px;">
+              <label for="is_active" style="margin:0;">Langsung Terbitkan</label>
             </div>
 
-            <div style="margin-top:12px;">
-              <button class="btn primary" type="submit">Simpan</button>
-            </div>
+            <button class="btn primary" type="submit"><i class="fas fa-save"></i> Upload Galeri</button>
           </form>
         </div>
+      </aside>
 
-        <!-- LIST -->
+      <section>
         <div class="card">
-          <h3>Daftar Galeri</h3>
-          <p class="muted" style="margin-top:-6px;">Urutan kecil tampil lebih dulu. Status <b>Aktif</b> saja yang tampil di galeri publik.</p>
-
-          <div style="overflow:auto;">
+          <h3><i class="fas fa-list"></i> Koleksi Galeri</h3>
+          <div class="table-container">
             <table class="table">
               <thead>
                 <tr>
-                  <th>Foto</th>
-                  <th>Info</th>
+                  <th>Visual</th>
+                  <th>Detail Informasi</th>
                   <th>Status</th>
                   <th>Urutan</th>
-                  <th>Aksi</th>
+                  <th style="text-align:right;">Opsi</th>
                 </tr>
               </thead>
               <tbody>
-              <?php if (count($items) === 0): ?>
-                <tr><td colspan="5" class="muted">Belum ada data galeri.</td></tr>
-              <?php else: ?>
-                <?php foreach ($items as $it): ?>
-                  <?php
+                <?php if (count($items) === 0): ?>
+                  <tr><td colspan="5" style="text-align:center;" class="muted">Belum ada koleksi foto.</td></tr>
+                <?php else: ?>
+                  <?php foreach ($items as $it): 
                     $imgRel = $uploadBase . ($it['gambar'] ?? '');
                     $imgAbs = $uploadDir . ($it['gambar'] ?? '');
                     $hasImg = ($it['gambar'] ?? '') !== '' && file_exists($imgAbs);
                     $judul = (string)($it['judul'] ?? '');
-                    $desc  = (string)($it['deskripsi'] ?? '');
-                    $alt   = (string)($it['alt_text'] ?? $judul);
                     $active = (int)($it['is_active'] ?? 0);
                   ?>
                   <tr>
                     <td>
-                      <?php if ($hasImg): ?>
-                        <img class="thumb" src="../<?= h($imgRel) ?>" alt="<?= h($alt) ?>">
-                      <?php else: ?>
-                        <div class="thumb" style="display:flex;align-items:center;justify-content:center;color:#777;font-weight:700;">No Image</div>
-                      <?php endif; ?>
+                      <div class="thumb-wrapper">
+                        <?php if ($hasImg): ?>
+                          <img class="thumb" src="../<?= h($imgRel) ?>" alt="thumb">
+                        <?php else: ?>
+                          <div style="background:#eee; height:100%; display:flex; align-items:center; justify-content:center; font-size:10px;">N/A</div>
+                        <?php endif; ?>
+                      </div>
                     </td>
                     <td>
-                      <div style="font-weight:800;"><?= h($judul) ?></div>
-                      <?php if ($desc): ?>
-                        <div class="muted"><?= h($desc) ?></div>
-                      <?php endif; ?>
-                      <div class="muted">File: <?= h((string)($it['gambar'] ?? '-')) ?></div>
+                      <div style="font-weight:600; color:var(--primary);"><?= h($judul) ?></div>
+                      <div class="muted" style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        <?= h((string)$it['deskripsi']) ?>
+                      </div>
                     </td>
                     <td>
-                      <?php if ($active === 1): ?>
-                        <span class="badge on">AKTIF</span>
-                      <?php else: ?>
-                        <span class="badge off">NONAKTIF</span>
-                      <?php endif; ?>
+                      <span class="badge <?= $active === 1 ? 'on' : 'off' ?>">
+                        <?= $active === 1 ? 'PUBLISHED' : 'DRAFT' ?>
+                      </span>
                     </td>
                     <td>
-                      <form method="post" class="inline" style="gap:6px;">
+                      <form method="post" style="display:flex; gap:5px;">
                         <input type="hidden" name="action" value="order">
                         <input type="hidden" name="id" value="<?= (int)$it['id'] ?>">
-                        <input type="number" name="urutan" value="<?= (int)($it['urutan'] ?? 0) ?>" style="width:80px;padding:8px 10px;border-radius:10px;border:1px solid #ddd;">
-                        <button class="btn small" type="submit">Update</button>
+                        <input type="number" name="urutan" value="<?= (int)$it['urutan'] ?>" class="order-input">
+                        <button class="btn outline small" type="submit"><i class="fas fa-sync"></i></button>
                       </form>
                     </td>
                     <td>
-                      <div class="actions">
+                      <div class="action-group" style="justify-content: flex-end;">
                         <form method="post">
                           <input type="hidden" name="action" value="toggle">
                           <input type="hidden" name="id" value="<?= (int)$it['id'] ?>">
                           <input type="hidden" name="to" value="<?= $active === 1 ? 0 : 1 ?>">
-                          <button class="btn small" type="submit"><?= $active === 1 ? 'Nonaktifkan' : 'Aktifkan' ?></button>
+                          <button class="btn outline small" type="submit" title="Ubah Status">
+                            <i class="fas <?= $active === 1 ? 'fa-eye-slash' : 'fa-eye' ?>"></i>
+                          </button>
                         </form>
 
-                        <form method="post" onsubmit="return confirm('Hapus item galeri ini? File gambarnya juga akan dihapus.');">
+                        <form method="post" onsubmit="return confirm('Hapus permanen foto ini?');">
                           <input type="hidden" name="action" value="delete">
                           <input type="hidden" name="id" value="<?= (int)$it['id'] ?>">
-                          <button class="btn danger small" type="submit">Hapus</button>
+                          <button class="btn danger small" type="submit"><i class="fas fa-trash"></i></button>
                         </form>
                       </div>
                     </td>
                   </tr>
-                <?php endforeach; ?>
-              <?php endif; ?>
+                  <?php endforeach; ?>
+                <?php endif; ?>
               </tbody>
             </table>
           </div>
-
         </div>
-      </div>
-    </section>
-  </main>
+      </section>
+    </div>
+  </div>
 </body>
 </html>

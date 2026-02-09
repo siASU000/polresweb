@@ -1,3 +1,19 @@
+<?php
+// 1. KONEKSI DATABASE & AMBIL DATA
+require __DIR__ . '/admin/db_connection.php';
+
+// Ambil data dari tabel profil_settings (ID 1)
+$query = "SELECT * FROM profil_settings WHERE id = 1";
+$result = $conn->query($query);
+$p = $result->fetch_assoc();
+
+// Fungsi helper untuk keamanan output
+function e($v) { return htmlspecialchars((string)($v ?? ''), ENT_QUOTES, 'UTF-8'); }
+
+// Fallback jika gambar kosong
+$foto_kapolres = !empty($p['foto_kapolres']) ? 'uploads/profil/' . $p['foto_kapolres'] : 'assets/kapolres padang.jpg';
+$foto_wakapolres = !empty($p['foto_wakapolres']) ? 'uploads/profil/' . $p['foto_wakapolres'] : 'assets/wakapolres padang.jpg';
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -5,238 +21,153 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Profil - Polresta Padang</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
+    /* Reset & Base */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Poppins', sans-serif; background-color: #f4f4f4; }
+    body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; color: #334155; line-height: 1.6; }
 
-    header {
-      background-color: #222;
-      padding: 20px 50px;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
+    /* Main Container */
+    main { max-width: 1200px; margin: 0 auto; padding: 40px 20px 80px; }
 
-    .header-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      max-width: 1400px;
-      margin: 0 auto;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
+    /* Typography Polish */
+    h2 { color: #1e293b; position: relative; padding-bottom: 10px; margin-bottom: 20px; }
+    h2::after { content: ''; position: absolute; left: 0; bottom: 0; width: 50px; height: 4px; background: #FCC236; border-radius: 2px; }
 
-    .logo { width: 220px; height: auto; }
-
-    nav ul { display: flex; list-style: none; gap: 20px; }
-    nav ul li { position: relative; }
-    nav ul li a {
-      text-decoration: none;
-      color: #fff;
-      font-weight: 600;
-      font-size: 14px;
-      text-transform: uppercase;
-      transition: color 0.3s ease;
-      position: relative;
-      display: inline-block;
-    }
-    nav ul li a:hover { color: #FCC236; }
-    nav ul li a:hover::after {
-      content: '';
-      position: absolute;
-      bottom: -5px;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background-color: #FCC236;
-      transition: all 0.3s ease;
-    }
-    nav ul li a.active {
-      color: #FCC236;
-      border-bottom: 2px solid #FCC236;
-    }
-
-    .footer-search input {
-      padding: 10px;
-      border-radius: 4px;
-      border: none;
-      width: 250px;
-      font-size: 14px;
-    }
-    .footer-search button {
-      padding: 10px 20px;
-      background-color: #0c1427;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.3s ease;
-      width: 100px;
-    }
-    .footer-search button:hover { background-color: #FCC236; transform: scale(1.05); }
-
-    .call-center {
-      background-color: #FCC236;
-      color: #000;
-      padding: 10px 20px;
-      border: none;
-      font-weight: bold;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.3s ease;
-    }
-    .call-center:hover { background-color: #f5a623; transform: scale(1.05); }
-
-    .has-dropdown { position: relative; }
-    .has-dropdown .dropdown{
-      position: absolute;
-      top: 100%;
-      left: 0;
-      min-width: 260px;
-      background: #fff;
-      list-style: none;
-      padding: 10px 0;
-      margin: 12px 0 0;
-      border-radius: 6px;
-      box-shadow: 0 12px 25px rgba(0,0,0,0.18);
-      display: none;
-      z-index: 2000;
-    }
-    .has-dropdown .dropdown li a{
-      display: block;
-      padding: 14px 18px;
-      color: #111;
-      text-transform: uppercase;
-      font-weight: 600;
-      font-size: 12px;
-      text-decoration: none;
-    }
-    .has-dropdown .dropdown li a:hover{
-      background: #f2f2f2;
-      color: #111;
-    }
-    .has-dropdown:hover .dropdown{ display: block; }
-
-    main {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 30px 20px 60px;
-      background: transparent;
-    }
-
-    .profil-grid{
+    /* Grid Layout */
+    .profil-grid {
       display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 30px;
+      grid-template-columns: 320px 1fr;
+      gap: 40px;
       align-items: start;
     }
 
-    .profil-sidebar{
-      display: flex;
-      flex-direction: column;
-      gap: 25px;
-    }
-    .profil-card{
-      border: 1px solid #e6e6e6;
+    /* Sidebar Pimpinan */
+    .profil-sidebar { display: flex; flex-direction: column; gap: 30px; }
+    
+    .profil-card {
       background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease;
+      border: 1px solid #e2e8f0;
     }
-    .profil-card-title{
+    .profil-card:hover { transform: translateY(-5px); }
+
+    .profil-card-title {
+      background: #1e293b;
+      color: #FCC236;
       font-weight: 700;
-      font-size: 11px;
-      letter-spacing: 0.3px;
-      padding: 10px 12px;
-      border-bottom: 1px solid #e6e6e6;
+      font-size: 12px;
+      text-align: center;
+      padding: 12px;
+      letter-spacing: 1px;
     }
-    .profil-card-photo{
-      background: #d9d9d9;
-      padding: 10px;
+    
+    .profil-card-photo {
+      padding: 15px;
+      background: #fff;
       display: flex;
       justify-content: center;
-      align-items: center;
     }
-    .profil-card-photo img{
+    .profil-card-photo img {
       width: 100%;
-      height: auto;
+      height: 380px;
       object-fit: cover;
-      border-radius: 4px;
+      border-radius: 10px;
+      filter: grayscale(10%);
     }
-    .profil-card-name{
-      font-size: 11px;
-      font-weight: 600;
-      padding: 10px 12px;
-    }
-
-    .profil-content{
-      display: flex;
-      flex-direction: column;
-      gap: 40px;
-    }
-    .vm-row{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-    }
-    .vm-box h2{
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: 1px;
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      color: #111;
-    }
-    .vm-placeholder{
-      background: #d9d9d9;
-      height: 300px;
-      border-radius: 2px;
-    }
-
-    .simple-section{
-      margin-top: 30px;
-      background: #fff;
-      border: 1px solid #e6e6e6;
-      padding: 20px;
-    }
-    .simple-section h2{ margin-bottom: 10px; }
-
-    footer { display: flex; flex-direction: column; margin-top: 50px; }
-
-    .footer-top {
-      background-color: #f44336;
-      padding: 30px 50px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: white;
-    }
-    .footer-bottom {
-      background-color: #b71c1c;
-      padding: 15px 0;
-      text-align: center;
-      color: white;
+    
+    .profil-card-name {
       font-size: 14px;
-    }
-    .footer-info p { margin: 5px 0; font-weight: 500; }
-
-    @media (max-width: 992px){
-      .profil-grid{ grid-template-columns: 1fr; }
-      .vm-row{ grid-template-columns: 1fr; }
-      header{ padding: 20px; }
-      .footer-top{ padding: 20px; }
+      font-weight: 700;
+      text-align: center;
+      padding: 15px;
+      color: #1e293b;
+      border-top: 1px solid #f1f5f9;
     }
 
-    @media (max-width: 768px){
-      .footer-search input, .footer-search button { width: 100%; }
-      .footer-top{ flex-direction: column; align-items: center; gap: 12px; }
+    /* Visi Misi Style */
+    .profil-content { display: flex; flex-direction: column; gap: 30px; }
+    
+    .vm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+    
+    .vm-box {
+      background: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      border-left: 5px solid #FCC236;
+    }
+    
+    .vm-box h2 { font-size: 22px; margin-bottom: 15px; border: none; padding: 0; }
+    .vm-box h2::after { display: none; }
+    
+    .vm-text { color: #64748b; font-size: 15px; white-space: pre-line; }
+
+    /* Simple Section (Sejarah & Struktur) */
+    .simple-section {
+      margin-top: 40px;
+      background: #fff;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    
+    .content-text { font-size: 16px; color: #475569; line-height: 1.8; white-space: pre-line; }
+
+    /* Navbar logic (Keep your header styles or use partials) */
+    header { background-color: #222; padding: 20px 50px; position: sticky; top: 0; z-index: 1000; }
+    .header-container { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto; }
+    .logo { width: 220px; height: auto; }
+    nav ul { display: flex; list-style: none; gap: 20px; }
+    nav ul li a { text-decoration: none; color: #fff; font-weight: 600; font-size: 14px; text-transform: uppercase; }
+    nav ul li a.active { color: #FCC236; border-bottom: 2px solid #FCC236; }
+
+    /* Footer Styles */
+    footer { margin-top: 80px; }
+    .footer-top { background-color: #f44336; padding: 40px 50px; color: white; display: flex; justify-content: space-between; align-items: center; }
+    .footer-bottom { background-color: #b71c1c; padding: 20px; text-align: center; color: white; font-size: 14px; }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .profil-grid { grid-template-columns: 1fr; }
+      .profil-sidebar { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+      .profil-card { width: 100%; max-width: 350px; }
+    }
+    @media (max-width: 768px) {
+      .vm-row { grid-template-columns: 1fr; }
+      .footer-top { flex-direction: column; text-align: center; gap: 20px; }
     }
   </style>
 </head>
 
 <body>
 
-<?php require __DIR__ . '/partials/header.php'; ?>
+<?php 
+// Pastikan file ini ada, jika tidak, kode header di bawah bisa diaktifkan
+if(file_exists(__DIR__ . '/partials/header.php')) {
+    require __DIR__ . '/partials/header.php'; 
+} else {
+?>
+    <header>
+      <div class="header-container">
+        <img src="assets/Logo Polresta Padang.png" class="logo" alt="Logo">
+        <nav>
+          <ul>
+            <li><a href="index.php">Home</a></li>
+            <li><a href="profil.php" class="active">Profil</a></li>
+            <li><a href="berita.php">Berita</a></li>
+            <li><a href="galeri.php">Galeri</a></li>
+            <li><a href="informasi.php">Informasi</a></li>
+            <li><a href="kontak.php">Hubungi Kami</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+<?php } ?>
 
 <main>
   <section id="visi-misi">
@@ -244,61 +175,77 @@
 
       <aside class="profil-sidebar">
         <div class="profil-card" id="kapolres">
-          <div class="profil-card-title">KAPOLRESTA PADANG</div>
+          <div class="profil-card-title"><i class="fa-solid fa-star"></i> KAPOLRESTA PADANG</div>
           <div class="profil-card-photo">
-            <img src="assets/kapolres padang.jpg" alt="Kapolres Padang">
+            <img src="<?= $foto_kapolres ?>" alt="Kapolres Padang">
           </div>
-          <div class="profil-card-name">Kombes Pol. Apri Wibowo, S.I.K., M.H.</div>
+          <div class="profil-card-name"><?= e($p['nama_kapolres'] ?? 'Kombes Pol. Apri Wibowo, S.I.K., M.H.') ?></div>
         </div>
 
         <div class="profil-card" id="wakapolres">
-          <div class="profil-card-title">WAKAPOLRESTA PADANG</div>
+          <div class="profil-card-title"><i class="fa-solid fa-star-half-stroke"></i> WAKAPOLRESTA PADANG</div>
           <div class="profil-card-photo">
-            <img src="assets/wakapolres padang.jpg" alt="Wakapolres Padang">
+            <img src="<?= $foto_wakapolres ?>" alt="Wakapolres Padang">
           </div>
-          <div class="profil-card-name">AKBP Faidil Zikri, S.H., S.I.K., M.Si.</div>
+          <div class="profil-card-name"><?= e($p['nama_wakapolres'] ?? 'AKBP Faidil Zikri, S.H., S.I.K., M.Si.') ?></div>
         </div>
       </aside>
 
       <div class="profil-content">
         <div class="vm-row">
           <div class="vm-box">
-            <h2>VISI</h2>
-            <div class="vm-placeholder"></div>
+            <h2><i class="fa-solid fa-eye" style="color:#FCC236"></i> VISI</h2>
+            <div class="vm-text">
+                <?= !empty($p['visi']) ? e($p['visi']) : 'Visi Polresta Padang belum diatur.' ?>
+            </div>
           </div>
           <div class="vm-box">
-            <h2>MISI</h2>
-            <div class="vm-placeholder"></div>
+            <h2><i class="fa-solid fa-bullseye" style="color:#FCC236"></i> MISI</h2>
+            <div class="vm-text">
+                <?= !empty($p['misi']) ? e($p['misi']) : 'Misi Polresta Padang belum diatur.' ?>
+            </div>
           </div>
         </div>
 
-        <div class="vm-row">
-          <div class="vm-box">
-            <h2>VISI</h2>
-            <div class="vm-placeholder"></div>
+        <section id="sejarah" class="simple-section">
+          <h2><i class="fa-solid fa-clock-rotate-left" style="color:#FCC236"></i> Sejarah</h2>
+          <div class="content-text">
+            <?= !empty($p['sejarah']) ? e($p['sejarah']) : 'Informasi sejarah belum tersedia.' ?>
           </div>
-          <div class="vm-box">
-            <h2>MISI</h2>
-            <div class="vm-placeholder"></div>
+        </section>
+
+        <section id="struktur" class="simple-section">
+          <h2><i class="fa-solid fa-sitemap" style="color:#FCC236"></i> Struktur Organisasi</h2>
+          <div class="content-text">
+            <?= !empty($p['struktur_organisasi']) ? e($p['struktur_organisasi']) : 'Informasi struktur organisasi belum tersedia.' ?>
           </div>
-        </div>
+        </section>
       </div>
 
     </div>
   </section>
-
-  <section id="sejarah" class="simple-section">
-    <h2>Sejarah</h2>
-    <p>Isi sejarah Polresta Padang ditulis di sini.</p>
-  </section>
-
-  <section id="struktur" class="simple-section">
-    <h2>Struktur Organisasi</h2>
-    <p>Isi struktur organisasi ditulis di sini.</p>
-  </section>
 </main>
 
-<?php require __DIR__ . '/partials/footer.php'; ?>
+<?php 
+if(file_exists(__DIR__ . '/partials/footer.php')) {
+    require __DIR__ . '/partials/footer.php'; 
+} else {
+?>
+    <footer>
+      <div class="footer-top">
+        <div class="footer-info">
+          <p>POLRESTA PADANG</p>
+          <p>Jl. Moh. Hoesni Thamrin No.1, Alang Laweh, Padang Selatan</p>
+        </div>
+        <div class="footer-contact">
+          <p>Call Center: 110</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Polresta Padang - Kepolisian Negara Republik Indonesia</p>
+      </div>
+    </footer>
+<?php } ?>
 
 <script>
   // Auto active menu berdasarkan nama file

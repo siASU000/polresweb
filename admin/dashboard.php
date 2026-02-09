@@ -35,6 +35,7 @@ require __DIR__ . "/auth_guard.php";
       <!-- Link ke file kelola yang ada di ROOT (sesuai screenshot kamu) -->
       <div class="sidebar-title mt">Kelola Konten</div>
       <a class="nav-item" href="kelola-home.php">Kelola Home</a>
+      <a class="nav-item" href="kelola-profil.php">Kelola Profil</a>
       <a class="nav-item" href="kelola-berita.php">Kelola Berita</a>
       <a class="nav-item" href="kelola-galeri.php">Kelola Galeri</a>
       <a class="nav-item" href="kelola-informasi.php">Kelola Informasi</a>

@@ -2525,3 +2525,305 @@ body.page-informasi .info-photo{
 .berita-populer-judul:hover {
     text-decoration: underline;
 }
+/* 1. CONTAINER UTAMA SIDEBAR (Hapus background kuning di sini) */
+ .sidebar-pimpinan {
+  flex: 0 0 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  align-items: center;
+  
+  /* AKTIFKAN STICKY */
+  position: sticky;
+  top: 20px; /* Jarak dari batas atas layar saat menempel */
+  align-self: flex-start; /* WAJIB ada agar sticky bekerja pada flexbox */
+  
+  /* Hapus overflow agar tidak muncul scroll bar ganda */
+  max-height: none; 
+  overflow: visible;
+}
+
+/* 2. KOTAK KHUSUS PIMPINAN (Pindahkan background kuning ke sini) */
+.pimpinan-container {
+  background: #FCC236; /* Warna kuning pindah ke sini */
+  width: 100%;
+  padding: 20px 15px; /* Padding dalam kotak kuning */
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow agar terlihat timbul */
+}
+
+/* Style item pimpinan tetap sama */
+.pimpinan-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* 3. KOTAK BERITA POPULER (Terpisah di bawah) */
+.berita-populer {
+  background: #fff; /* Latar putih */
+  padding: 20px;
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Shadow lebih lembut */
+  border: 1px solid #eee; /* Garis tipis supaya batasnya jelas */
+  /* margin-top: 20px; <-- Tidak perlu lagi karena parent sudah pakai 'gap: 30px' */
+}
+
+.berita-populer h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #FCC236; /* Aksen garis kuning di bawah judul */
+  padding-bottom: 10px;
+  font-size: 1.2rem;
+}
+
+/* List scrollable berita populer */
+.berita-populer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  
+  /* 1. Kotak akan memanjang otomatis sampai 450px */
+  max-height: 450px; 
+  
+  /* 2. Jika berita lebih banyak dari 450px, muncul scrollbar internal */
+  overflow-y: auto; 
+  
+  /* 3. Memberi ruang agar bayangan (shadow) tidak terpotong saat scroll */
+  padding-right: 5px; 
+}
+
+/* Opsional: Mempercantik tampilan scrollbar di dalam kotak berita */
+.berita-populer-list::-webkit-scrollbar {
+  width: 5px;
+}
+.berita-populer-list::-webkit-scrollbar-thumb {
+  background: #FCC236; /* Warna kuning agar senada */
+  border-radius: 10px;
+}
+
+/* Item berita populer */
+.berita-populer-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start; /* Supaya teks sejajar atas */
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.berita-populer-item:last-child {
+  border-bottom: none;
+}
+
+/* FIX BERITA TERKINI (Kotak HitAM) */
+.berita-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 20px !important;
+}
+
+.berita-main-item {
+    flex: 1 1 300px !important; /* Biar kalau cuma 1 tetap di tengah, kalau 3 sejajar */
+    max-width: 380px !important;
+    height: 250px !important;
+    background: #000 !important;
+    border-radius: 15px !important;
+    overflow: hidden !important;
+}
+
+/* FIX GAMBAR BIAR TIDAK TERPOTONG */
+.berita-main-item img, .berita-gambar {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important; /* INI KUNCINYA */
+}
+
+/* FIX KATEGORI (Kriminal, SDM, Humas) */
+.grid-lainnya {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    gap: 20px !important;
+}
+
+.berita-item {
+    display: flex !important;
+    flex-direction: column !important;
+    border: 1px solid #ddd !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    height: 100% !important;
+}
+
+.berita-info {
+    padding: 15px !important;
+}
+
+/* CSS POPULER YANG KAMU SUKA (Gunakan Class Berbeda agar Aman) */
+.populer-item {
+    display: flex !important;
+    gap: 12px !important;
+    margin-bottom: 15px !important;
+    align-items: center !important;
+    border-bottom: 1px solid #eee !important;
+    padding-bottom: 10px !important;
+}
+/* CSS KHUSUS BERITA POPULER SIDEBAR */
+.berita-populer {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-top: 20px;
+}
+
+.berita-populer h3 {
+    font-size: 16px;
+    border-bottom: 3px solid #f1c40f;
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.populer-item {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    align-items: flex-start;
+}
+
+.populer-item:last-child {
+    border-bottom: none;
+}
+
+.populer-img-wrapper {
+    flex-shrink: 0;
+    width: 80px;
+    height: 60px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.populer-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Agar gambar tidak gepeng */
+}
+
+.populer-info {
+    flex-grow: 1;
+}
+
+.populer-text-link {
+    display: block;
+    text-decoration: none;
+    color: #222;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 4px;
+}
+
+.populer-text-link:hover {
+    color: #f1c40f;
+}
+
+.populer-date {
+    font-size: 11px;
+    color: #999;
+}
+
+/* Container Utama Sidebar */
+.sidebar-pimpinan {
+    display: flex;
+    flex-direction: column;
+    gap: 25px; /* Jarak antar kotak */
+    background: transparent !important; /* Hapus background kuning lama */
+    padding: 0 !important;
+}
+
+/* Kotak Putih (Card) */
+.sidebar-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border: 1px solid #eee;
+}
+
+/* Judul Tengah */
+.sidebar-header {
+    text-align: center; /* Tulisan di tengah */
+    font-size: 16px;
+    font-weight: 800;
+    color: #222;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid #f1c40f; /* Garis bawah kuning */
+    text-transform: uppercase;
+}
+
+/* Gaya Foto Pimpinan */
+.pimpinan-item {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.pimpinan-photo {
+    width: 140px;
+    height: 170px;
+    margin: 0 auto 10px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 3px solid #f1c40f;
+}
+.pimpinan-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.pimpinan-nama {
+    font-size: 11px;
+    color: #333;
+    line-height: 1.4;
+}
+
+/* Gaya Berita Populer */
+.populer-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f9f9f9;
+}
+.populer-thumb {
+    width: 70px;
+    height: 55px;
+    flex-shrink: 0;
+    border-radius: 5px;
+    overflow: hidden;
+}
+.populer-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.populer-link {
+    text-decoration: none;
+    color: #222;
+    font-weight: 600;
+    font-size: 12.5px;
+    display: block;
+    line-height: 1.3;
+}
+.populer-date {
+    font-size: 10px;
+    color: #999;
+}
+
