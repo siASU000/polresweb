@@ -5,7 +5,7 @@ const db = mysql.createConnection({
   host: "localhost", // ganti dengan host database Anda
   user: "root",      // ganti dengan user MySQL Anda
   password: "",      // ganti dengan password MySQL Anda
-  database: "polresta_padang", // ganti dengan nama database Anda
+  database: "polresta_padang_db", // ganti dengan nama database Anda
 });
 
 db.connect((err) => {

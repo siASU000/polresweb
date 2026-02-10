@@ -17,8 +17,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 
 // Sesuaikan path login ini dengan punyamu
-$loginUrl = '/Polresta_Padang/admin/login.php'; // Ubah ke login.php
-// Kalau URL kamu pakai /polresta_padang/ maka ubah sesuai itu
+$loginUrl = '/webandruy/admin/login.php'; // Ubah ke login.php
+// Kalau URL kamu pakai /webandruy/ maka ubah sesuai itu
 
 $isLoggedIn = !empty($_SESSION['auth']) && $_SESSION['auth'] === true;
 

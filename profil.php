@@ -157,12 +157,12 @@ if(file_exists(__DIR__ . '/partials/header.php')) {
         <img src="assets/Logo Polresta Padang.png" class="logo" alt="Logo">
         <nav>
           <ul>
-            <li><a href="index.php">Home</a></li>
-            <li><a href="profil.php" class="active">Profil</a></li>
-            <li><a href="berita.php">Berita</a></li>
-            <li><a href="galeri.php">Galeri</a></li>
-            <li><a href="informasi.php">Informasi</a></li>
-            <li><a href="kontak.php">Hubungi Kami</a></li>
+            <li><a href="/webandruy/">Home</a></li>
+            <li><a href="profil" class="active">Profil</a></li>
+            <li><a href="berita">Berita</a></li>
+            <li><a href="galeri">Galeri</a></li>
+            <li><a href="informasi">Informasi</a></li>
+            <li><a href="hubungi-kami">Hubungi Kami</a></li>
           </ul>
         </nav>
       </div>
@@ -250,10 +250,13 @@ if(file_exists(__DIR__ . '/partials/footer.php')) {
 <script>
   // Auto active menu berdasarkan nama file
   (function () {
-    const current = window.location.pathname.split("/").pop() || "index.php";
+    let current = window.location.pathname.split("/").pop() || "index";
+    current = current.replace(/\.php$/, '');
+    if (current === '' || current === 'webandruy') current = 'index';
     document.querySelectorAll("nav a").forEach(a => {
-      const href = a.getAttribute("href");
-      if (href === current) a.classList.add("active");
+      let href = a.getAttribute("href") || '';
+      let hrefPage = href.split('?')[0].split('#')[0].split('/').pop().replace(/\.php$/, '') || '';
+      if (hrefPage === current) a.classList.add("active");
     });
   })();
 </script>

@@ -24,30 +24,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // PERBAIKAN LOGIKA FOLDER: Menggunakan path absolut yang lebih aman
     $rootPath = dirname(__DIR__); 
-    $uploadDir = $rootPath . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'profil' . DIRECTORY_SEPARATOR;
-
-    // Jika folder belum ada, buat. Simbol @ untuk mencegah pesan warning jika folder sudah ada atau akses ditolak sistem
-    if (!is_dir($uploadDir)) {
-        @mkdir($uploadDir, 0777, true);
+    $uploadDir = $rootPath . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'profil';
+    
+    // Jika path exists tapi bukan directory (file), hapus dulu
+    if (file_exists($uploadDir) && !is_dir($uploadDir)) {
+        @unlink($uploadDir);
     }
+    
+    // Buat folder jika belum ada
+    if (!is_dir($uploadDir)) {
+        if (!@mkdir($uploadDir, 0777, true)) {
+            $flash = ['type'=>'danger', 'msg'=>'Gagal membuat folder upload. Periksa permission folder uploads/'];
+        }
+    }
+    
+    $uploadDir .= DIRECTORY_SEPARATOR;
 
     // Proses Foto Kapolres
     $foto_kapolres = $p['foto_kapolres'] ?? '';
-    if (!empty($_FILES['f_kapolres']['name'])) {
+    if (!empty($_FILES['f_kapolres']['name']) && $_FILES['f_kapolres']['error'] === UPLOAD_ERR_OK) {
         $ext = pathinfo($_FILES['f_kapolres']['name'], PATHINFO_EXTENSION);
         $newName = 'kapolres_' . time() . '.' . $ext;
         if (move_uploaded_file($_FILES['f_kapolres']['tmp_name'], $uploadDir . $newName)) {
             $foto_kapolres = $newName;
+        } else {
+            $flash = ['type'=>'warning', 'msg'=>'Gagal upload foto Kapolres. Folder: ' . $uploadDir];
         }
     }
 
     // Proses Foto Wakapolres
     $foto_wakapolres = $p['foto_wakapolres'] ?? '';
-    if (!empty($_FILES['f_wakapolres']['name'])) {
+    if (!empty($_FILES['f_wakapolres']['name']) && $_FILES['f_wakapolres']['error'] === UPLOAD_ERR_OK) {
         $ext = pathinfo($_FILES['f_wakapolres']['name'], PATHINFO_EXTENSION);
         $newName = 'wakapolres_' . time() . '.' . $ext;
         if (move_uploaded_file($_FILES['f_wakapolres']['tmp_name'], $uploadDir . $newName)) {
             $foto_wakapolres = $newName;
+        } else {
+            $flash = ['type'=>'warning', 'msg'=>'Gagal upload foto Wakapolres. Folder: ' . $uploadDir];
         }
     }
 

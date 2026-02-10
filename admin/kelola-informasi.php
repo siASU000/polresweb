@@ -237,7 +237,7 @@ function badgeTipe(?string $t): string {
       </div>
       <div class="topbar">
         <a class="btn" href="dashboard.php">Dashboard</a>
-        <a class="btn primary" href="/polresta_padang/informasi.php" target="_blank">Lihat Publik</a>
+        <a class="btn primary" href="/webandruy/informasi" target="_blank">Lihat Publik</a>
       </div>
     </div>
 

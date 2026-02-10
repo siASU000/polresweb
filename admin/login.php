@@ -14,12 +14,12 @@ function safe_next(string $next, string $fallback): string {
     if ($next[0] !== '/') return $fallback;
 
     // batasi hanya dalam aplikasi ini (sesuaikan jika folder berbeda)
-    if (stripos($next, '/polresta_padang/') !== 0) return $fallback;
+    if (stripos($next, '/webandruy/admin/') !== 0) return $fallback;
 
     return $next;
 }
 
-$defaultAfterLogin = '/polresta_padang/admin/dashboard.php';
+$defaultAfterLogin = '/webandruy/admin/dashboard.php';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

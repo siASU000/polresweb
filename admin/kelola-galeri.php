@@ -294,7 +294,7 @@ $items = fetchGaleri($conn);
       </div>
       <div class="action-group">
         <a class="btn outline" href="dashboard.php"><i class="fas fa-arrow-left"></i> Dashboard</a>
-        <a class="btn outline" href="../galeri.php" target="_blank"><i class="fas fa-external-link-alt"></i> Lihat Web</a>
+        <a class="btn outline" href="../galeri" target="_blank"><i class="fas fa-external-link-alt"></i> Lihat Web</a>
       </div>
     </header>
 

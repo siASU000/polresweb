@@ -10,7 +10,7 @@ const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'polresta_padang',
+  database: 'polresta_padang_db',
 });
 
 app.post('/login', (req, res) => {

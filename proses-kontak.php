@@ -7,11 +7,11 @@ $subject = trim($_POST['subjek'] ?? '');
 $message = trim($_POST['pesan'] ?? '');
 
 if ($name === '' || $email === '' || $subject === '' || $message === '') {
-  header("Location: hubungi-kami.php?status=error");
+  header("Location: hubungi-kami?status=error");
   exit;
 }
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-  header("Location: hubungi-kami.php?status=invalid_email");
+  header("Location: hubungi-kami?status=invalid_email");
   exit;
 }
 
@@ -24,5 +24,5 @@ $stmt->bind_param("ssssss", $name, $email, $subject, $message, $ip, $ua);
 $stmt->execute();
 $stmt->close();
 
-header("Location: hubungi-kami.php?status=sent");
+header("Location: hubungi-kami?status=sent");
 exit;

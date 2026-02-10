@@ -71,6 +71,35 @@ function handleUpload(?array $file, string $destDir): ?string {
     return $newName;
 }
 
+// Generate SEO-friendly slug from title
+function generateSlug(string $title): string {
+    $slug = strtolower(trim($title));
+    $slug = preg_replace('/[^a-z0-9\s-]/', '', $slug);
+    $slug = preg_replace('/[\s-]+/', '-', $slug);
+    $slug = trim($slug, '-');
+    if ($slug === '') $slug = 'berita';
+    return $slug;
+}
+
+function ensureUniqueSlug(mysqli $conn, string $baseSlug, int $excludeId = 0): string {
+    $slug = $baseSlug;
+    $counter = 1;
+    while (true) {
+        $check = $conn->prepare("SELECT id FROM berita WHERE slug = ? AND id != ?");
+        $check->bind_param("si", $slug, $excludeId);
+        $check->execute();
+        $result = $check->get_result();
+        if ($result->num_rows === 0) {
+            $check->close();
+            break;
+        }
+        $check->close();
+        $slug = $baseSlug . '-' . $counter;
+        $counter++;
+    }
+    return $slug;
+}
+
 // === 5. ROUTING & SETUP ===
 $mode = $_GET['mode'] ?? 'list';
 $id   = (int)($_GET['id'] ?? 0);
@@ -94,8 +123,17 @@ try {
         $ed_id    = empty($_POST['editor_id']) ? null : (int)$_POST['editor_id'];
         $gambar   = handleUpload($_FILES['gambar'] ?? null, $beritaUploadDir);
 
-        $stmt = $conn->prepare("INSERT INTO berita (judul, isi, tanggal, kategori, editor_id, gambar, display_category) VALUES (?,?,?,?,?,?,?)");
-        $stmt->bind_param("ssssiss", $judul, $isi, $tanggal, $kategori, $ed_id, $gambar, $display);
+        // Auto-generate slug from title
+        $slug = ensureUniqueSlug($conn, generateSlug($judul));
+        
+        // Auto-generate meta description from content
+        $metaDesc = trim($_POST['meta_description'] ?? '');
+        if ($metaDesc === '') {
+            $metaDesc = mb_substr(strip_tags(preg_replace('/\s+/', ' ', $isi)), 0, 160, 'UTF-8');
+        }
+
+        $stmt = $conn->prepare("INSERT INTO berita (judul, slug, isi, meta_description, tanggal, kategori, editor_id, gambar, display_category) VALUES (?,?,?,?,?,?,?,?,?)");
+        $stmt->bind_param("ssssssiss", $judul, $slug, $isi, $metaDesc, $tanggal, $kategori, $ed_id, $gambar, $display);
         
         if (!$stmt->execute()) throw new RuntimeException("Gagal Simpan: " . $stmt->error);
         redirect('kelola-berita.php?ok=created');
@@ -112,6 +150,15 @@ try {
         $kategori = ($display === 'Tampilan Berita Utama') ? trim($_POST['kategori'] ?? '') : '';
         
         $ed_id    = empty($_POST['editor_id']) ? null : (int)$_POST['editor_id'];
+
+        // Regenerate slug if title changed
+        $slug = ensureUniqueSlug($conn, generateSlug($judul), $id);
+        
+        // Meta description
+        $metaDesc = trim($_POST['meta_description'] ?? '');
+        if ($metaDesc === '') {
+            $metaDesc = mb_substr(strip_tags(preg_replace('/\s+/', ' ', $isi)), 0, 160, 'UTF-8');
+        }
         
         // Ambil gambar lama
         $qOld = $conn->query("SELECT gambar FROM berita WHERE id=$id");
@@ -123,8 +170,8 @@ try {
         if (isset($_POST['hapus_gambar'])) $finalImg = null;
         if ($newImg) $finalImg = $newImg;
 
-        $stmt = $conn->prepare("UPDATE berita SET judul=?, isi=?, tanggal=?, kategori=?, editor_id=?, gambar=?, display_category=? WHERE id=?");
-        $stmt->bind_param("ssssissi", $judul, $isi, $tanggal, $kategori, $ed_id, $finalImg, $display, $id);
+        $stmt = $conn->prepare("UPDATE berita SET judul=?, slug=?, isi=?, meta_description=?, tanggal=?, kategori=?, editor_id=?, gambar=?, display_category=? WHERE id=?");
+        $stmt->bind_param("ssssssissi", $judul, $slug, $isi, $metaDesc, $tanggal, $kategori, $ed_id, $finalImg, $display, $id);
         
         if (!$stmt->execute()) throw new RuntimeException("Gagal Update: " . $stmt->error);
         redirect('kelola-berita.php?ok=updated');
@@ -253,6 +300,7 @@ if ($mode === 'edit' && $id > 0) {
                     <tr>
                         <th width="50">Img</th>
                         <th>Judul Berita</th>
+                        <th>Slug</th>
                         <th>Posisi & Kategori</th>
                         <th>Editor</th>
                         <th>Tanggal</th>
@@ -261,7 +309,7 @@ if ($mode === 'edit' && $id > 0) {
                 </thead>
                 <tbody>
                     <?php if(empty($beritaList)): ?>
-                        <tr><td colspan="6" style="text-align:center; padding: 30px; color:#999;">Belum ada berita yang ditambahkan.</td></tr>
+                        <tr><td colspan="7" style="text-align:center; padding: 30px; color:#999;">Belum ada berita yang ditambahkan.</td></tr>
                     <?php endif; ?>
 
                     <?php foreach($beritaList as $b): ?>
@@ -275,6 +323,9 @@ if ($mode === 'edit' && $id > 0) {
                         </td>
                         <td>
                             <strong><?= h($b['judul']) ?></strong>
+                        </td>
+                        <td>
+                            <small class="text-muted"><?= h($b['slug'] ?? '-') ?></small>
                         </td>
                         <td>
                             <span class="badge badge-main"><?= h($b['display_category'] ?? '-') ?></span><br>
@@ -337,6 +388,11 @@ if ($mode === 'edit' && $id > 0) {
                     <div>
                         <label>Isi Berita</label>
                         <textarea name="isi" required placeholder="Tulis isi berita lengkap..."><?= h($beritaEdit['isi'] ?? '') ?></textarea>
+                    </div>
+
+                    <div>
+                        <label>Meta Description (SEO) <small class="text-muted">— Opsional, maks 160 karakter. Jika kosong akan otomatis diambil dari isi berita.</small></label>
+                        <input type="text" name="meta_description" value="<?= h($beritaEdit['meta_description'] ?? '') ?>" placeholder="Deskripsi singkat untuk mesin pencari..." maxlength="160">
                     </div>
 
                     <div class="grid">

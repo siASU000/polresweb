@@ -14,5 +14,5 @@ if (ini_get('session.use_cookies')) {
 session_destroy();
 
 // balik ke login
-header('Location: /Polresta_Padang/admin/login.php');
+header('Location: /webandruy/admin/login.php');
 exit;

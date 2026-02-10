@@ -1,0 +1,29 @@
+RewriteEngine On
+RewriteBase /webandruy/
+
+# Disable MultiViews to prevent Apache from guessing file matches
+Options -MultiViews
+
+# Berita detail with slug: /berita/slug-name -> berita-detail.php?slug=slug-name
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^berita/([a-zA-Z0-9_-]+)$ berita-detail.php?slug=$1 [L,QSA]
+
+# Jika request bukan file atau folder yang ada
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Redirect /pagename ke /pagename.php
+RewriteRule ^([a-zA-Z0-9_-]+)$ $1.php [L,QSA]
+
+# Redirect external .php URLs ke clean URLs (301 redirect)
+RewriteCond %{THE_REQUEST} \s/webandruy/([a-zA-Z0-9_-]+)\.php[\s?] [NC]
+RewriteRule ^ /webandruy/%1 [R=301,L]
+
+# Redirect old berita-detail?id=X to slug URL
+RewriteCond %{THE_REQUEST} \s/webandruy/berita-detail\?id=([0-9]+) [NC]
+RewriteRule ^ /webandruy/berita-detail?id=%1 [L]
+
+# Redirect index.php ke root
+RewriteCond %{THE_REQUEST} \s/webandruy/index\.php[\s?] [NC]
+RewriteRule ^ /webandruy/ [R=301,L]

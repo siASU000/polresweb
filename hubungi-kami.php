@@ -163,7 +163,7 @@ $waLink = normalize_wa_to_wa_me((string)$whatsapp);
       <p style="margin:10px 0; color:#b91c1c; font-weight:600;">Lengkapi semua field.</p>
     <?php endif; ?>
 
-    <form class="hubungi-form" action="proses-kontak.php" method="post">
+    <form class="hubungi-form" action="proses-kontak" method="post">
       <input type="text" name="nama" placeholder="Nama" required>
       <input type="email" name="email" placeholder="Email" required>
       <input type="text" name="subjek" placeholder="Subjek" required>
