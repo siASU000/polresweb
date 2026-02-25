@@ -13,7 +13,7 @@ function h(string $s): string
 }
 
 $uploadBase = 'uploads/berita/';
-$siteUrl = 'http://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/webandruy/';
+$siteUrl = 'http://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/Polresta_Padang/';
 
 // Support both slug and legacy id parameter
 $slug = isset($_GET['slug']) ? trim($_GET['slug']) : '';
@@ -85,7 +85,7 @@ if (!empty($data['kategori'])) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="/webandruy/" />
+    <base href="/Polresta_Padang/" />
     <title><?= $pageTitle ?></title>
     <meta name="description" content="<?= $metaDesc ?>" />
     <meta name="robots" content="index, follow" />

@@ -1,5 +1,5 @@
 RewriteEngine On
-RewriteBase /webandruy/
+RewriteBase /Polresta_Padang/
 
 # Disable MultiViews to prevent Apache from guessing file matches
 Options -MultiViews
@@ -17,13 +17,13 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^([a-zA-Z0-9_-]+)$ $1.php [L,QSA]
 
 # Redirect external .php URLs ke clean URLs (301 redirect)
-RewriteCond %{THE_REQUEST} \s/webandruy/([a-zA-Z0-9_-]+)\.php[\s?] [NC]
-RewriteRule ^ /webandruy/%1 [R=301,L]
+RewriteCond %{THE_REQUEST} \s/Polresta_Padang/([a-zA-Z0-9_-]+)\.php[\s?] [NC]
+RewriteRule ^ /Polresta_Padang/%1 [R=301,L]
 
 # Redirect old berita-detail?id=X to slug URL
-RewriteCond %{THE_REQUEST} \s/webandruy/berita-detail\?id=([0-9]+) [NC]
-RewriteRule ^ /webandruy/berita-detail?id=%1 [L]
+RewriteCond %{THE_REQUEST} \s/Polresta_Padang/berita-detail\?id=([0-9]+) [NC]
+RewriteRule ^ /Polresta_Padang/berita-detail?id=%1 [L]
 
 # Redirect index.php ke root
-RewriteCond %{THE_REQUEST} \s/webandruy/index\.php[\s?] [NC]
-RewriteRule ^ /webandruy/ [R=301,L]
+RewriteCond %{THE_REQUEST} \s/Polresta_Padang/index\.php[\s?] [NC]
+RewriteRule ^ /Polresta_Padang/ [R=301,L]

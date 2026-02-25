@@ -262,7 +262,7 @@ $botBg    = $fs['bottom_bg'] ?? '#0f0f1a';
       <div class="footer-col">
         <h3>Navigasi</h3>
         <ul class="footer-links">
-          <li><a href="/webandruy/">Beranda</a></li>
+          <li><a href="/Polresta_Padang/">Beranda</a></li>
           <li><a href="profil">Profil</a></li>
           <li><a href="berita">Berita</a></li>
           <li><a href="galeri">Galeri</a></li>

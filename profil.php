@@ -157,7 +157,7 @@ if(file_exists(__DIR__ . '/partials/header.php')) {
         <img src="assets/Logo Polresta Padang.png" class="logo" alt="Logo">
         <nav>
           <ul>
-            <li><a href="/webandruy/">Home</a></li>
+            <li><a href="/Polresta_Padang/">Home</a></li>
             <li><a href="profil" class="active">Profil</a></li>
             <li><a href="berita">Berita</a></li>
             <li><a href="galeri">Galeri</a></li>
@@ -252,7 +252,7 @@ if(file_exists(__DIR__ . '/partials/footer.php')) {
   (function () {
     let current = window.location.pathname.split("/").pop() || "index";
     current = current.replace(/\.php$/, '');
-    if (current === '' || current === 'webandruy') current = 'index';
+    if (current === '' || current === 'Polresta_Padang') current = 'index';
     document.querySelectorAll("nav a").forEach(a => {
       let href = a.getAttribute("href") || '';
       let hrefPage = href.split('?')[0].split('#')[0].split('/').pop().replace(/\.php$/, '') || '';

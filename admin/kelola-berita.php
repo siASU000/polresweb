@@ -25,7 +25,7 @@ $DISPLAY_OPTS  = ['Tampilan Berita Utama', 'Berita Terkini', 'Berita Populer'];
 function h(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 function redirect(string $url): void { header("Location: " . $url); exit; }
 
-// Deteksi kolom nama pada tabel editor agar tidak error, andri anjiang
+// Deteksi kolom nama pada tabel editor agar tidak error
 function detectEditorLabelField(mysqli $conn): string {
     $fieldsPriority = ['nama_lengkap', 'nama', 'full_name', 'username', 'email'];
     $cols = [];
@@ -113,20 +113,16 @@ try {
     // CREATE
     if ($mode === 'create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $judul    = trim($_POST['judul'] ?? '');
-        $isi      = trim($_POST['isi'] ?? '');
+        $isi      = $_POST['isi'] ?? ''; // Jangan trim berlebihan agar tag HTML terjaga
         $tanggal  = $_POST['tanggal'] ?? date('Y-m-d');
         $display  = $_POST['display_category'] ?? 'Tampilan Berita Utama';
         
-        // Logika: Kategori hanya disimpan jika Display adalah Berita Utama
         $kategori = ($display === 'Tampilan Berita Utama') ? trim($_POST['kategori'] ?? '') : '';
-        
         $ed_id    = empty($_POST['editor_id']) ? null : (int)$_POST['editor_id'];
         $gambar   = handleUpload($_FILES['gambar'] ?? null, $beritaUploadDir);
 
-        // Auto-generate slug from title
         $slug = ensureUniqueSlug($conn, generateSlug($judul));
         
-        // Auto-generate meta description from content
         $metaDesc = trim($_POST['meta_description'] ?? '');
         if ($metaDesc === '') {
             $metaDesc = mb_substr(strip_tags(preg_replace('/\s+/', ' ', $isi)), 0, 160, 'UTF-8');
@@ -142,25 +138,20 @@ try {
     // EDIT
     if ($mode === 'edit' && $id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $judul    = trim($_POST['judul'] ?? '');
-        $isi      = trim($_POST['isi'] ?? '');
+        $isi      = $_POST['isi'] ?? ''; // TinyMCE mengirimkan data HTML ke sini
         $tanggal  = $_POST['tanggal'] ?? '';
         $display  = $_POST['display_category'] ?? 'Tampilan Berita Utama';
         
-        // Logika: Kategori dihapus jika bukan Berita Utama
         $kategori = ($display === 'Tampilan Berita Utama') ? trim($_POST['kategori'] ?? '') : '';
-        
         $ed_id    = empty($_POST['editor_id']) ? null : (int)$_POST['editor_id'];
 
-        // Regenerate slug if title changed
         $slug = ensureUniqueSlug($conn, generateSlug($judul), $id);
         
-        // Meta description
         $metaDesc = trim($_POST['meta_description'] ?? '');
         if ($metaDesc === '') {
             $metaDesc = mb_substr(strip_tags(preg_replace('/\s+/', ' ', $isi)), 0, 160, 'UTF-8');
         }
         
-        // Ambil gambar lama
         $qOld = $conn->query("SELECT gambar FROM berita WHERE id=$id");
         $oldData = $qOld ? $qOld->fetch_assoc() : null;
         
@@ -201,10 +192,8 @@ if (isset($_GET['ok'])) {
     $flashOk = $msgs[$_GET['ok']] ?? '';
 }
 
-// Ambil list editor untuk dropdown dan mapping
 $editorMap = fetchEditorsMap($conn);
 
-// Ambil list berita (Hanya query sederhana agar tidak error JOIN)
 $beritaList = [];
 if ($mode === 'list') {
     $res = $conn->query("SELECT * FROM berita ORDER BY tanggal DESC, id DESC");
@@ -216,7 +205,6 @@ if ($mode === 'list') {
     }
 }
 
-// Ambil satu berita untuk edit
 $beritaEdit = null;
 if ($mode === 'edit' && $id > 0) {
     $res = $conn->query("SELECT * FROM berita WHERE id=$id");
@@ -230,43 +218,32 @@ if ($mode === 'edit' && $id > 0) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Berita - Polresta Padang</title>
+    <script src="https://cdn.tiny.cloud/1/qxoa1nvib16ymjts7my24crtxmphz7aab621ez64j0gxxfub/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     <style>
         :root { --primary: #111; --border: #ddd; --bg: #f9f9f9; --danger: #d32f2f; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #333; margin: 0; padding: 20px; }
         .wrap { max-width: 1100px; margin: 0 auto; }
-        
-        /* Topbar */
         .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .topbar h1 { margin: 0; font-size: 24px; }
-        
-        /* Buttons */
         .btn { padding: 10px 18px; border-radius: 8px; text-decoration: none; cursor: pointer; border: 1px solid var(--border); background: #fff; color: #333; display: inline-flex; align-items: center; font-size: 14px; font-weight: 500; transition: 0.2s; }
         .btn:hover { background: #f0f0f0; }
         .btn-dark { background: var(--primary); color: #fff; border-color: var(--primary); }
         .btn-dark:hover { background: #333; }
         .btn-danger { color: var(--danger); border-color: #ffcdd2; background: #fff; }
         .btn-danger:hover { background: #ffebee; }
-        
-        /* Card & Table */
         .card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
         .table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .table th { text-align: left; padding: 12px; background: #f8f9fa; border-bottom: 2px solid #eee; font-size: 13px; text-transform: uppercase; color: #666; }
         .table td { padding: 14px 12px; border-bottom: 1px solid #eee; vertical-align: middle; }
-        
-        /* Alerts */
         .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 500; }
         .alert-ok { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
         .alert-err { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
-        
-        /* Forms */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .grid-1 { grid-template-columns: 1fr; }
         label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: #444; }
         input[type="text"], input[type="date"], select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 14px; transition: 0.2s; }
         input:focus, select:focus, textarea:focus { border-color: #000; outline: none; }
-        textarea { min-height: 180px; resize: vertical; font-family: inherit; }
-        
-        /* Utilities */
+        textarea { min-height: 300px; resize: vertical; font-family: inherit; }
         .hidden { display: none; }
         .text-muted { color: #888; font-size: 12px; }
         .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; background: #eee; }
@@ -279,16 +256,16 @@ if ($mode === 'edit' && $id > 0) {
 
 <div class="wrap">
     <div class="topbar">
-    <h1>Kelola Berita</h1>
-    <div>
-        <?php if($mode !== 'list'): ?>
-            <a href="kelola-berita.php" class="btn">Kembali</a>
-        <?php else: ?>
-            <a href="dashboard.php" class="btn">Kembali ke Dashboard</a>
-            <a href="?mode=create" class="btn btn-dark">+ Tambah Berita</a>
-        <?php endif; ?>
+        <h1>Kelola Berita</h1>
+        <div>
+            <?php if($mode !== 'list'): ?>
+                <a href="kelola-berita.php" class="btn">Kembali</a>
+            <?php else: ?>
+                <a href="dashboard.php" class="btn">Kembali ke Dashboard</a>
+                <a href="?mode=create" class="btn btn-dark">+ Tambah Berita</a>
+            <?php endif; ?>
+        </div>
     </div>
-</div>
 
     <?php if($flashOk): ?> <div class="alert alert-ok"><?= h($flashOk) ?></div> <?php endif; ?>
     <?php if($flashError): ?> <div class="alert alert-err"><strong>Error:</strong> <?= h($flashError) ?></div> <?php endif; ?>
@@ -321,21 +298,15 @@ if ($mode === 'edit' && $id > 0) {
                                 <span class="text-muted">-</span>
                             <?php endif; ?>
                         </td>
-                        <td>
-                            <strong><?= h($b['judul']) ?></strong>
-                        </td>
-                        <td>
-                            <small class="text-muted"><?= h($b['slug'] ?? '-') ?></small>
-                        </td>
+                        <td><strong><?= h($b['judul']) ?></strong></td>
+                        <td><small class="text-muted"><?= h($b['slug'] ?? '-') ?></small></td>
                         <td>
                             <span class="badge badge-main"><?= h($b['display_category'] ?? '-') ?></span><br>
                             <?php if(!empty($b['kategori'])): ?>
                                 <small class="text-muted">Kat: <?= h($b['kategori']) ?></small>
                             <?php endif; ?>
                         </td>
-                        <td>
-                            <?= h($editorMap[$b['editor_id']] ?? '—') ?>
-                        </td>
+                        <td><?= h($editorMap[$b['editor_id']] ?? '—') ?></td>
                         <td><?= date('d/m/Y', strtotime($b['tanggal'])) ?></td>
                         <td>
                             <a href="?mode=edit&id=<?= $b['id'] ?>" class="btn" style="padding: 6px 12px; font-size:12px;">Edit</a>
@@ -356,7 +327,6 @@ if ($mode === 'edit' && $id > 0) {
             
             <form method="POST" enctype="multipart/form-data">
                 <div class="grid grid-1" style="margin-bottom: 20px;">
-                    
                     <div>
                         <label>Judul Berita</label>
                         <input type="text" name="judul" value="<?= h($beritaEdit['judul'] ?? '') ?>" required placeholder="Masukkan judul berita...">
@@ -387,7 +357,7 @@ if ($mode === 'edit' && $id > 0) {
 
                     <div>
                         <label>Isi Berita</label>
-                        <textarea name="isi" required placeholder="Tulis isi berita lengkap..."><?= h($beritaEdit['isi'] ?? '') ?></textarea>
+                        <textarea id="isi_editor" name="isi" placeholder="Tulis isi berita lengkap..."><?= h($beritaEdit['isi'] ?? '') ?></textarea>
                     </div>
 
                     <div>
@@ -433,17 +403,29 @@ if ($mode === 'edit' && $id > 0) {
                 </div>
 
                 <div style="display:flex; gap:12px; margin-top:30px;">
-    <button type="submit" class="btn btn-dark" style="flex:1; padding: 12px 24px; font-weight:bold;">
-        <?= $mode === 'create' ? 'SIMPAN BERITA' : 'UPDATE PERUBAHAN' ?>
-    </button>
-    <a href="kelola-berita.php" class="btn" style="padding: 12px 24px;">Batal</a>
-</div>
+                    <button type="submit" class="btn btn-dark" style="flex:1; padding: 12px 24px; font-weight:bold;">
+                        <?= $mode === 'create' ? 'SIMPAN BERITA' : 'UPDATE PERUBAHAN' ?>
+                    </button>
+                    <a href="kelola-berita.php" class="btn" style="padding: 12px 24px;">Batal</a>
+                </div>
             </form>
         </div>
     <?php endif; ?>
 </div>
 
 <script>
+/**
+ * INISIALISASI TINYMCE
+ */
+tinymce.init({
+    selector: '#isi_editor',
+    plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code help wordcount',
+    toolbar: 'undo redo | blocks | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
+    height: 500,
+    branding: false,
+    promotion: false
+});
+
 /**
  * JAVASCRIPT LOGIC
  * Menyembunyikan dropdown kategori jika yang dipilih BUKAN 'Tampilan Berita Utama'
@@ -452,20 +434,17 @@ function toggleKategoriLogic() {
     const displaySelect = document.getElementById('display_category');
     const katBox = document.getElementById('kat_box');
     
-    // Pastikan elemen ada sebelum dimanipulasi (menghindari error JS)
     if (!displaySelect || !katBox) return;
 
     if (displaySelect.value === 'Tampilan Berita Utama') {
         katBox.style.display = 'block';
     } else {
         katBox.style.display = 'none';
-        // Reset pilihan kategori agar bersih saat disubmit
         const katSelect = katBox.querySelector('select');
         if(katSelect) katSelect.value = ''; 
     }
 }
 
-// Jalankan saat halaman selesai dimuat agar kondisi Edit terjaga
 document.addEventListener('DOMContentLoaded', toggleKategoriLogic);
 </script>
 

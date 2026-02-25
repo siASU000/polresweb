@@ -43,7 +43,7 @@ $segments = explode('/', $currentPath);
 $current = end($segments);
 // Remove .php extension for matching
 $current = preg_replace('/\.php$/', '', $current);
-if ($current === '' || $current === 'webandruy') $current = 'index';
+if ($current === '' || $current === 'Polresta_Padang') $current = 'index';
 ?>
 
 <style>

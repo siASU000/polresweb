@@ -2,7 +2,7 @@
   let current = window.location.pathname.split("/").pop() || "index";
   // Remove .php extension if present
   current = current.replace(/\.php$/, '');
-  if (current === '' || current === 'webandruy') current = 'index';
+  if (current === '' || current === 'Polresta_Padang') current = 'index';
   
   document.querySelectorAll("nav a").forEach(a => {
     let href = a.getAttribute("href") || '';
