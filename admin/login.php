@@ -3,65 +3,72 @@ declare(strict_types=1);
 session_start();
 require_once __DIR__ . '/db_connection.php';
 
-function safe_next(string $next, string $fallback): string {
-    $next = trim($next);
-    if ($next === '') return $fallback;
+function safe_next(string $next, string $fallback): string
+{
+  $next = trim($next);
+  if ($next === '')
+    return $fallback;
 
-    // blok open redirect (URL luar)
-    if (preg_match('#^(https?:)?//#i', $next)) return $fallback;
+  // blok open redirect (URL luar)
+  if (preg_match('#^(https?:)?//#i', $next))
+    return $fallback;
 
-    // hanya izinkan path absolut internal
-    if ($next[0] !== '/') return $fallback;
+  // hanya izinkan path absolut internal
+  if ($next[0] !== '/')
+    return $fallback;
 
-    // batasi hanya dalam aplikasi ini (sesuaikan jika folder berbeda)
-    if (stripos($next, '/Polresta_Padang/admin/') !== 0) return $fallback;
+  // batasi hanya dalam aplikasi ini (sesuaikan jika folder berbeda)
+  if (stripos($next, '/webandruy/admin/') !== 0)
+    return $fallback;
 
-    return $next;
+  return $next;
 }
 
-$defaultAfterLogin = '/Polresta_Padang/admin/dashboard.php';
+$defaultAfterLogin = '/webandruy/admin/dashboard.php';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
-    $password = (string)($_POST['password'] ?? '');
-    $nextPost = (string)($_POST['next'] ?? '');
+  $username = trim($_POST['username'] ?? '');
+  $password = (string) ($_POST['password'] ?? '');
+  $nextPost = (string) ($_POST['next'] ?? '');
 
-    if ($username === '' || $password === '') {
-        $error = 'Username dan password wajib diisi';
+  if ($username === '' || $password === '') {
+    $error = 'Username dan password wajib diisi';
+  } else {
+    $stmt = $conn->prepare('SELECT id, username, password, role FROM admin WHERE username = ? LIMIT 1');
+    if (!$stmt) {
+      $error = 'Query error: ' . $conn->error;
     } else {
-        $stmt = $conn->prepare('SELECT id, username, password, role FROM admin WHERE username = ? LIMIT 1');
-        if (!$stmt) {
-            $error = 'Query error: ' . $conn->error;
-        } else {
-            $stmt->bind_param('s', $username);
-            $stmt->execute();
-            $res = $stmt->get_result();
-            $row = $res ? $res->fetch_assoc() : null;
-            $stmt->close();
+      $stmt->bind_param('s', $username);
+      $stmt->execute();
+      $res = $stmt->get_result();
+      $row = $res ? $res->fetch_assoc() : null;
+      $stmt->close();
 
-            if (!$row || !password_verify($password, (string)$row['password'])) {
-                $error = 'Username atau password salah';
-            } else {
-                $_SESSION['auth'] = true;
-                $_SESSION['admin_id'] = (int)$row['id'];
-                $_SESSION['username'] = (string)$row['username'];
-                $_SESSION['role'] = (string)$row['role'];
+      if (!$row || !password_verify($password, (string) $row['password'])) {
+        $error = 'Username atau password salah';
+      } else {
+        $_SESSION['auth'] = true;
+        $_SESSION['admin_id'] = (int) $row['id'];
+        $_SESSION['username'] = (string) $row['username'];
+        $_SESSION['role'] = (string) $row['role'];
 
-                $dest = safe_next($nextPost, $defaultAfterLogin);
-                header('Location: ' . $dest);
-                exit;
-            }
-        }
+        $dest = safe_next($nextPost, $defaultAfterLogin);
+        header('Location: ' . $dest);
+        exit;
+      }
     }
+  }
 }
 
-$nextGet = (string)($_GET['next'] ?? '');
+$nextGet = (string) ($_GET['next'] ?? '');
 $nextValue = htmlspecialchars(safe_next($nextGet, $defaultAfterLogin), ENT_QUOTES, 'UTF-8');
 ?>
 <!doctype html>
 <html lang="id">
+
 <head>
+  <link rel="icon" type="image/png" href="/webandruy/assets/logo.png" />
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Admin Login - Polresta Padang</title>
@@ -95,7 +102,8 @@ $nextValue = htmlspecialchars(safe_next($nextGet, $defaultAfterLogin), ENT_QUOTE
         <input class="login-input" type="text" id="username" name="username" placeholder="Masukkan Username" required>
 
         <label class="login-label" for="password">PASSWORD</label>
-        <input class="login-input" type="password" id="password" name="password" placeholder="Masukkan Password" required>
+        <input class="login-input" type="password" id="password" name="password" placeholder="Masukkan Password"
+          required>
 
         <input type="hidden" name="next" value="<?= $nextValue ?>">
 
@@ -106,4 +114,5 @@ $nextValue = htmlspecialchars(safe_next($nextGet, $defaultAfterLogin), ENT_QUOTE
     </div>
   </div>
 </body>
+
 </html>

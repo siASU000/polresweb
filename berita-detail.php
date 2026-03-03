@@ -13,7 +13,7 @@ function h(string $s): string
 }
 
 $uploadBase = 'uploads/berita/';
-$siteUrl = 'http://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/Polresta_Padang/';
+$siteUrl = 'http://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/webandruy/';
 
 // Support both slug and legacy id parameter
 $slug = isset($_GET['slug']) ? trim($_GET['slug']) : '';
@@ -83,9 +83,10 @@ if (!empty($data['kategori'])) {
 <html lang="id">
 
 <head>
+  <link rel="icon" type="image/png" href="/webandruy/assets/logo.png" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="/Polresta_Padang/" />
+    <base href="/webandruy/" />
     <title><?= $pageTitle ?></title>
     <meta name="description" content="<?= $metaDesc ?>" />
     <meta name="robots" content="index, follow" />
@@ -119,7 +120,7 @@ if (!empty($data['kategori'])) {
         "description": <?= json_encode(strip_tags(mb_substr((string) $data['isi'], 0, 200, 'UTF-8')), JSON_UNESCAPED_UNICODE) ?>,
         "datePublished": "<?= $publishDate ?>",
         <?php if ($ogImage): ?>
-            "image": "<?= h($ogImage) ?>",
+                "image": "<?= h($ogImage) ?>",
         <?php endif; ?>
         "author": {
             "@type": "Organization",

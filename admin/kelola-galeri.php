@@ -197,10 +197,12 @@ $items = fetchGaleri($conn);
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <link rel="icon" type="image/png" href="/webandruy/assets/logo.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kelola Galeri - Admin Polresta Padang</title>
   <link rel="stylesheet" href="admin.css" />
+    <link rel="stylesheet" href="dashboard.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -215,7 +217,7 @@ $items = fetchGaleri($conn);
 
     body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); }
     
-    .admin-shell { max-width: 1400px; margin: 0 auto; padding: 20px; }
+    .admin-shell { max-width: 100%; padding: 0; }
     
     /* Header Stying */
     .header-panel { 
@@ -286,6 +288,7 @@ $items = fetchGaleri($conn);
 </head>
 
 <body>
+<?php require __DIR__ . "/sidebar.php"; ?>
   <div class="admin-shell">
     <header class="header-panel">
       <div>
@@ -430,6 +433,8 @@ $items = fetchGaleri($conn);
         </div>
       </section>
     </div>
+  </div>
+    </main>
   </div>
 </body>
 </html>

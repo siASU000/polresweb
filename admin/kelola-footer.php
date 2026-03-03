@@ -33,15 +33,17 @@ $fs = $fsRes ? $fsRes->fetch_assoc() : [];
 <!doctype html>
 <html lang="id">
 <head>
+  <link rel="icon" type="image/png" href="/webandruy/assets/logo.png" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Kelola Footer | Polresta Padang</title>
     <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --primary: #f5b400; --dark: #1e293b; --bg: #f1f5f9; }
-        body { background: var(--bg); font-family: 'Inter', sans-serif; color: #334155; }
-        .wrap { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        body { font-family: 'Inter', sans-serif; color: #334155; margin: 0; }
+        .wrap { max-width: 100%; }
         
         .header-title { margin-bottom: 25px; border-left: 5px solid var(--primary); padding-left: 15px; }
         .header-title h2 { margin: 0; font-weight: 800; color: var(--dark); }
@@ -76,6 +78,7 @@ $fs = $fsRes ? $fsRes->fetch_assoc() : [];
     </style>
 </head>
 <body>
+<?php require __DIR__ . "/sidebar.php"; ?>
     <div class="wrap">
         <div class="header-title">
             <h2>Kelola Footer</h2>
@@ -172,5 +175,7 @@ $fs = $fsRes ? $fsRes->fetch_assoc() : [];
             });
         });
     </script>
+    </main>
+  </div>
 </body>
 </html>

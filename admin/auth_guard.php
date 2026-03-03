@@ -17,21 +17,21 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 
 // Sesuaikan path login ini dengan punyamu
-$loginUrl = '/Polresta_Padang/admin/login.php'; // Ubah ke login.php
-// Kalau URL kamu pakai /Polresta_Padang/ maka ubah sesuai itu
+$loginUrl = '/webandruy/admin/login.php'; // Ubah ke login.php
+// Kalau URL kamu pakai /webandruy/ maka ubah sesuai itu
 
 $isLoggedIn = !empty($_SESSION['auth']) && $_SESSION['auth'] === true;
 
 if (!$isLoggedIn) {
     $next = urlencode($_SERVER['REQUEST_URI'] ?? '');
 
-// Sesuaikan path login dan kirim dengan POST
-echo "<form id='loginForm' action='{$loginUrl}' method='POST'>
+    // Sesuaikan path login dan kirim dengan POST
+    echo "<form id='loginForm' action='{$loginUrl}' method='POST'>
         <input type='hidden' name='next' value='{$next}'>
         <input type='submit' style='display:none'>
       </form>";
-echo "<script>document.getElementById('loginForm').submit();</script>";
-exit;
+    echo "<script>document.getElementById('loginForm').submit();</script>";
+    exit;
 
     exit;
 }

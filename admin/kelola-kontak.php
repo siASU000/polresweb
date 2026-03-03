@@ -69,10 +69,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!doctype html>
 <html lang="id">
 <head>
+  <link rel="icon" type="image/png" href="/webandruy/assets/logo.png" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Kelola Kontak | Admin Polresta Padang</title>
     <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -81,8 +83,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             --bg-body: #f8fafc;
             --border-color: #e2e8f0;
         }
-        body { background: var(--bg-body); font-family: 'Inter', system-ui, sans-serif; color: #334155; }
-        .wrap { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+        body { font-family: 'Inter', system-ui, sans-serif; color: #334155; margin: 0; }
+        .wrap { max-width: 100%; }
         
         .header-section { margin-bottom: 30px; border-left: 5px solid var(--primary-color); padding-left: 15px; }
         .header-section h1 { font-size: 24px; font-weight: 800; color: var(--dark-blue); margin: 0; }
@@ -123,6 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
+<?php require __DIR__ . "/sidebar.php"; ?>
     <div class="wrap">
         <div class="header-section">
             <h1>Kelola Kontak</h1>
@@ -190,5 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </a>
         </div>
     </div>
+    </main>
+  </div>
 </body>
 </html>

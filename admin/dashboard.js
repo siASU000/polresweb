@@ -18,6 +18,23 @@ function setStatus(msg, isError = false) {
   if (msg) setTimeout(() => (saveStatus.textContent = ""), 2500);
 }
 
+function lockNumericOnly(inputEl) {
+  if (!inputEl) return;
+  inputEl.addEventListener("input", () => {
+    inputEl.value = inputEl.value.replace(/\D/g, "");
+  });
+  inputEl.addEventListener("paste", (e) => {
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData("text") || "";
+    inputEl.value = text.replace(/\D/g, "");
+    inputEl.dispatchEvent(new Event("input"));
+  });
+  inputEl.addEventListener("keypress", (e) => {
+    const ch = String.fromCharCode(e.which);
+    if (!/[0-9]/.test(ch)) e.preventDefault();
+  });
+}
+
 async function loadProfile() {
   const res = await fetch("profile_get.php", { credentials: "same-origin" });
   const json = await res.json();
@@ -29,9 +46,9 @@ async function loadProfile() {
 
   const d = json.data || {};
 
-  topUsernameEl.textContent = d.username || "-";
-  roleTextEl.textContent = d.role || "-";
-  usernameTextEl.textContent = d.username || "-";
+  if (topUsernameEl) topUsernameEl.textContent = d.username || "-";
+  if (roleTextEl) roleTextEl.textContent = d.role || "-";
+  if (usernameTextEl) usernameTextEl.textContent = d.username || "-";
 
   document.getElementById("nama").value = d.nama || "";
   document.getElementById("nrp").value = d.nrp || "";
@@ -39,89 +56,79 @@ async function loadProfile() {
   document.getElementById("alamat").value = d.alamat || "";
   document.getElementById("no_hp").value = d.no_hp || "";
   document.getElementById("jabatan").value = d.jabatan || "";
-function lockNumericOnly(inputEl) {
-  if (!inputEl) return;
 
-  // Blok karakter non-digit saat mengetik
-  inputEl.addEventListener("input", () => {
-    inputEl.value = inputEl.value.replace(/\D/g, "");
-  });
-
-  // Blok paste yang mengandung non-digit
-  inputEl.addEventListener("paste", (e) => {
-    e.preventDefault();
-    const text = (e.clipboardData || window.clipboardData).getData("text") || "";
-    inputEl.value = text.replace(/\D/g, "");
-    inputEl.dispatchEvent(new Event("input"));
-  });
-
-  // Blok keypress selain digit (opsional tapi membantu UX)
-  inputEl.addEventListener("keypress", (e) => {
-    const ch = String.fromCharCode(e.which);
-    if (!/[0-9]/.test(ch)) e.preventDefault();
-  });
-}
-
-// panggil setelah loadProfile mengisi value juga aman
-lockNumericOnly(document.getElementById("nrp"));
-lockNumericOnly(document.getElementById("no_hp"));
-
-  if (d.foto) {
+  if (d.foto && avatarEl) {
     avatarEl.src = "../" + d.foto;
   }
 }
 
-btnPilihFoto.addEventListener("click", () => fotoInput.click());
+// Lock numeric-only setelah DOM siap
+lockNumericOnly(document.getElementById("nrp"));
+lockNumericOnly(document.getElementById("no_hp"));
 
-btnUploadFoto.addEventListener("click", async () => {
-  if (!fotoInput.files || !fotoInput.files[0]) {
-    setStatus("Pilih foto dulu.", true);
-    return;
-  }
+if (btnPilihFoto) {
+  btnPilihFoto.addEventListener("click", () => fotoInput.click());
+}
 
-  const fd = new FormData();
-  fd.append("foto", fotoInput.files[0]);
+if (btnUploadFoto) {
+  btnUploadFoto.addEventListener("click", async () => {
+    if (!fotoInput.files || !fotoInput.files[0]) {
+      setStatus("Pilih foto dulu.", true);
+      return;
+    }
 
-  const res = await fetch("profile_upload.php", {
-    method: "POST",
-    body: fd,
-    credentials: "same-origin"
+    const fd = new FormData();
+    fd.append("foto", fotoInput.files[0]);
+
+    const res = await fetch("profile_upload.php", {
+      method: "POST",
+      body: fd,
+      credentials: "same-origin"
+    });
+
+    const json = await res.json();
+    if (!res.ok || json.status !== "success") {
+      setStatus(json.message || "Upload gagal.", true);
+      return;
+    }
+
+    avatarEl.src = "../" + json.foto;
+    setStatus("Foto tersimpan.");
   });
+}
 
-  const json = await res.json();
-  if (!res.ok || json.status !== "success") {
-    setStatus(json.message || "Upload gagal.", true);
-    return;
-  }
+if (form) {
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  avatarEl.src = "../" + json.foto;
-  setStatus("Foto tersimpan.");
-});
+    const fd = new FormData(form);
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
+    const res = await fetch("profile_update.php", {
+      method: "POST",
+      body: fd,
+      credentials: "same-origin"
+    });
 
-  const fd = new FormData(form);
+    const json = await res.json();
+    if (!res.ok || json.status !== "success") {
+      setStatus(json.message || "Gagal menyimpan profil.", true);
+      return;
+    }
 
-  const res = await fetch("profile_update.php", {
-    method: "POST",
-    body: fd,
-    credentials: "same-origin"
+    setStatus("Profil tersimpan.");
   });
-
-  const json = await res.json();
-  if (!res.ok || json.status !== "success") {
-    setStatus(json.message || "Gagal menyimpan profil.", true);
-    return;
-  }
-
-  setStatus("Profil tersimpan.");
-});
+}
 
 loadProfile().catch((err) => {
   console.error(err);
-  alert("Terjadi error saat memuat profil. Cek console.");
+  // Tampilkan pesan yang lebih ramah
+  const statusEl = document.getElementById("saveStatus");
+  if (statusEl) {
+    statusEl.textContent = "Gagal memuat data profil. Coba refresh halaman.";
+    statusEl.style.color = "#b91c1c";
+  }
 });
+
 const passForm = document.getElementById("passwordForm");
 const passStatus = document.getElementById("passStatus");
 

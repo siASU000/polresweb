@@ -42,10 +42,12 @@ while($row = $res->fetch_assoc()) { $cfg[$row['meta_key']] = $row['meta_value'];
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <link rel="icon" type="image/png" href="/webandruy/assets/logo.png" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Home - Polresta Padang</title>
     <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="dashboard.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -53,9 +55,9 @@ while($row = $res->fetch_assoc()) { $cfg[$row['meta_key']] = $row['meta_value'];
             --accent-color: #0984e3;
             --bg-gray: #f0f2f5;
         }
-        body { background-color: var(--bg-gray); font-family: 'Poppins', sans-serif; color: #333; margin: 0; }
+        body { font-family: 'Poppins', sans-serif; color: #333; margin: 0; }
         
-        .main-container { padding: 40px 20px; max-width: 1000px; margin: auto; }
+        .main-container { max-width: 100%; }
         
         /* Header Style */
         .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
@@ -119,6 +121,7 @@ while($row = $res->fetch_assoc()) { $cfg[$row['meta_key']] = $row['meta_value'];
     </style>
 </head>
 <body>
+<?php require __DIR__ . "/sidebar.php"; ?>
 
 <div class="main-container">
     <div class="top-nav">
@@ -194,5 +197,7 @@ while($row = $res->fetch_assoc()) { $cfg[$row['meta_key']] = $row['meta_value'];
     </form>
 </div>
 
+    </main>
+  </div>
 </body>
 </html>

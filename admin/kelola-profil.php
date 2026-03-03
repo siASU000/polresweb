@@ -83,15 +83,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!doctype html>
 <html lang="id">
 <head>
+  <link rel="icon" type="image/png" href="/webandruy/assets/logo.png" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Kelola Profil | Admin Polresta Padang</title>
     <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --primary: #f5b400; --dark: #1e293b; --bg: #f8fafc; }
         body { background: var(--bg); font-family: 'Poppins', sans-serif; color: #334155; }
-        .wrap { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        .wrap { max-width: 100%; }
         .card { background: #fff; border-radius: 16px; padding: 25px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         
         .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
@@ -136,6 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
+<?php require __DIR__ . "/sidebar.php"; ?>
     <div class="wrap">
         <div style="margin-bottom: 30px;">
             <h2 style="margin:0; font-weight: 800;"><i class="fa-solid fa-id-card-alt"></i> Kelola Profil</h2>
@@ -219,5 +222,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             evt.currentTarget.classList.add("active");
         }
     </script>
+    </main>
+  </div>
 </body>
 </html>

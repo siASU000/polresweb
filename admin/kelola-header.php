@@ -120,10 +120,12 @@ if ($parentsRes)
 <html lang="id">
 
 <head>
+  <link rel="icon" type="image/png" href="/webandruy/assets/logo.png" />
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kelola Header</title>
   <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="dashboard.css">
   <style>
     .wrap {
       max-width: 1100px;
@@ -209,6 +211,7 @@ if ($parentsRes)
 </head>
 
 <body>
+<?php require __DIR__ . "/sidebar.php"; ?>
   <div class="wrap">
     <h2>Kelola Header</h2>
 
@@ -341,6 +344,8 @@ if ($parentsRes)
       </table>
     </div>
 
+  </div>
+    </main>
   </div>
 </body>
 
