@@ -5,7 +5,6 @@ require __DIR__ . "/db_connection.php";
 
 $success_msg = "";
 
-// LOGIKA SIMPAN (DATABASE)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['config'])) {
         foreach ($_POST['config'] as $key => $value) {
@@ -33,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $success_msg = "Konfigurasi berhasil diperbarui!";
 }
 
-// AMBIL DATA
 $res = $conn->query("SELECT * FROM konfigurasi_home");
 $cfg = [];
 while($row = $res->fetch_assoc()) { $cfg[$row['meta_key']] = $row['meta_value']; }

@@ -15,14 +15,13 @@ function h(string $s): string
 $uploadBase = 'uploads/berita/';
 $siteUrl = 'http://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/webandruy/';
 
-// Support both slug and legacy id parameter
 $slug = isset($_GET['slug']) ? trim($_GET['slug']) : '';
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
 $data = null;
 
 if ($slug !== '') {
-    // Lookup by slug
+
     $stmt = $conn->prepare("SELECT id, judul, slug, isi, meta_description, tanggal, gambar, kategori FROM berita WHERE slug=? LIMIT 1");
     $stmt->bind_param("s", $slug);
     $stmt->execute();
@@ -30,7 +29,7 @@ if ($slug !== '') {
     $data = $res->fetch_assoc();
     $stmt->close();
 } elseif ($id > 0) {
-    // Legacy: lookup by id, then redirect to slug URL
+
     $stmt = $conn->prepare("SELECT id, judul, slug, isi, meta_description, tanggal, gambar, kategori FROM berita WHERE id=? LIMIT 1");
     $stmt->bind_param("i", $id);
     $stmt->execute();
@@ -38,7 +37,6 @@ if ($slug !== '') {
     $data = $res->fetch_assoc();
     $stmt->close();
 
-    // 301 redirect to slug URL if slug exists
     if ($data && !empty($data['slug'])) {
         header("Location: " . $siteUrl . "berita/" . $data['slug'], true, 301);
         exit;
@@ -62,12 +60,10 @@ $canonicalUrl = $siteUrl . 'berita/' . ($data['slug'] ?? $data['id']);
 $ogImage = $img !== '' ? ($siteUrl . $img) : '';
 $publishDate = date('c', strtotime($data['tanggal']));
 
-// Increment Views
 if (isset($data['id'])) {
     $conn->query("UPDATE berita SET views = views + 1 WHERE id = " . (int) $data['id']);
 }
 
-// Fetch related articles (same kategori, exclude current)
 $related = [];
 if (!empty($data['kategori'])) {
     $stmtR = $conn->prepare("SELECT id, judul, slug, gambar, tanggal FROM berita WHERE kategori=? AND id!=? ORDER BY tanggal DESC LIMIT 3");
@@ -92,7 +88,6 @@ if (!empty($data['kategori'])) {
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="<?= h($canonicalUrl) ?>" />
 
-    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="article" />
     <meta property="og:title" content="<?= $pageTitle ?>" />
     <meta property="og:description" content="<?= $metaDesc ?>" />
@@ -103,7 +98,6 @@ if (!empty($data['kategori'])) {
     <meta property="og:site_name" content="Polresta Padang" />
     <meta property="article:published_time" content="<?= $publishDate ?>" />
 
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="<?= $pageTitle ?>" />
     <meta name="twitter:description" content="<?= $metaDesc ?>" />
@@ -111,7 +105,6 @@ if (!empty($data['kategori'])) {
         <meta name="twitter:image" content="<?= h($ogImage) ?>" />
     <?php endif; ?>
 
-    <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -329,7 +322,6 @@ if (!empty($data['kategori'])) {
 
     <?php require __DIR__ . '/partials/header.php'; ?>
 
-
     <main class="content-wrapper">
         <div class="back-nav">
             <a href="berita"><i class="fas fa-arrow-left"></i> Kembali ke Daftar Berita</a>
@@ -337,7 +329,6 @@ if (!empty($data['kategori'])) {
 
         <div class="news-page-layout">
 
-            <!-- Main Content -->
             <div class="news-main-content">
                 <article>
                     <div class="news-header">
@@ -362,7 +353,6 @@ if (!empty($data['kategori'])) {
                     </div>
                 </article>
 
-                <!-- Share Section -->
                 <div class="share-section">
                     <h4><i class="fas fa-share-alt"></i> Bagikan Berita Ini</h4>
                     <div class="share-buttons">
@@ -411,14 +401,13 @@ if (!empty($data['kategori'])) {
                 <?php endif; ?>
             </div>
 
-            <!-- Sidebar Popular News -->
             <aside class="news-sidebar">
                 <div class="sidebar-title">
                     <i class="fas fa-fire" style="color:#e67e22;"></i> Terpopuler
                 </div>
                 <div class="popular-news-list">
                     <?php
-                    // Query Popular News (Local Scope)
+
                     $popSide = [];
                     $psSql = "SELECT id, judul, slug, gambar, views, tanggal FROM berita ORDER BY views DESC, tanggal DESC LIMIT 5";
                     $psRs = $conn->query($psSql);

@@ -15,7 +15,6 @@ function h(string $s): string
     return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 }
 
-// Helper tanggal Indo sederhana
 function tanggal_indo($tanggal)
 {
     $bulan = [
@@ -38,8 +37,6 @@ function tanggal_indo($tanggal)
 
 $uploadBase = 'uploads/berita/';
 
-
-// Ambil berita populer (5 terbanyak dilihat)
 $popular = [];
 $popSql = "SELECT id, judul, slug, gambar, views, tanggal FROM berita ORDER BY views DESC, tanggal DESC LIMIT 5";
 $popRs = $conn->query($popSql);
@@ -49,7 +46,6 @@ if ($popRs) {
     $popRs->free();
 }
 
-// Ambil berita terbaru
 $items = [];
 $sql = "SELECT id, judul, slug, tanggal, gambar 
         FROM berita 
@@ -259,7 +255,6 @@ if ($rs) {
 
         <div class="news-page-layout">
 
-            <!-- Kolom Kiri: Daftar Berita -->
             <div class="news-main-content">
                 <section class="berita-grid-page">
                     <?php if (count($items) === 0): ?>
@@ -293,7 +288,6 @@ if ($rs) {
                 </section>
             </div>
 
-            <!-- Kolom Kanan: Berita Populer -->
             <aside class="news-sidebar">
                 <div class="sidebar-title">
                     <i class="fas fa-fire" style="color:#e67e22;"></i> Terpopuler
@@ -322,7 +316,6 @@ if ($rs) {
             </aside>
 
         </div>
-
 
         <section class="cta-berita">
             <h3>Butuh Bantuan Kepolisian?</h3>

@@ -19,6 +19,5 @@ if (ini_get('session.use_cookies')) {
 
 session_destroy();
 
-// balik ke login
 header('Location: /webandruy/admin/login.php');
 exit;

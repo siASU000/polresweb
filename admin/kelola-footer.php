@@ -1,5 +1,5 @@
 <?php
-// admin/kelola-footer.php
+
 declare(strict_types=1);
 
 $ALLOWED_ROLES = ['admin','editor'];

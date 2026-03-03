@@ -1,5 +1,5 @@
 <?php
-// partials/footer.php
+
 $fsRes = $conn->query("SELECT * FROM footer_settings WHERE id=1");
 $fs = $fsRes ? $fsRes->fetch_assoc() : [];
 
@@ -267,11 +267,9 @@ $botBg = $fs['bottom_bg'] ?? '#0f0f1a';
 
 <footer class="police-footer">
 
-  <!-- Main Footer -->
   <div class="footer-main">
     <div class="footer-inner">
 
-      <!-- About -->
       <div class="footer-col">
         <h3>Polresta Padang</h3>
         <p class="footer-about-text">
@@ -288,7 +286,6 @@ $botBg = $fs['bottom_bg'] ?? '#0f0f1a';
         </div>
       </div>
 
-      <!-- Quick Links -->
       <div class="footer-col">
         <h3>Navigasi</h3>
         <ul class="footer-links">
@@ -301,7 +298,6 @@ $botBg = $fs['bottom_bg'] ?? '#0f0f1a';
         </ul>
       </div>
 
-      <!-- Services -->
       <div class="footer-col">
         <h3>Layanan</h3>
         <ul class="footer-links">
@@ -313,7 +309,6 @@ $botBg = $fs['bottom_bg'] ?? '#0f0f1a';
         </ul>
       </div>
 
-      <!-- Contact -->
       <div class="footer-col">
         <h3>Kontak</h3>
 
@@ -362,7 +357,6 @@ $botBg = $fs['bottom_bg'] ?? '#0f0f1a';
     </div>
   </div>
 
-  <!-- Emergency Bar -->
   <div class="footer-emergency">
     <div class="footer-emergency-inner">
       <div class="footer-emergency-text">
@@ -382,7 +376,6 @@ $botBg = $fs['bottom_bg'] ?? '#0f0f1a';
     </div>
   </div>
 
-  <!-- Bottom Bar -->
   <div class="footer-bottom-bar">
     <p><?= e($copy) ?> &mdash; Kepolisian Negara Republik Indonesia</p>
   </div>

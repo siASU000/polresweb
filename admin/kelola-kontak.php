@@ -5,11 +5,9 @@ ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
 
-// AUTH
 $ALLOWED_ROLES = ['admin', 'editor'];
 require __DIR__ . '/auth_guard.php';
 
-// DB (root/db_connection.php)
 require __DIR__ . '/db_connection.php';
 if (!isset($conn) || !($conn instanceof mysqli)) {
     die("Koneksi database tidak valid. Pastikan db_connection.php membuat variabel \$conn (mysqli).");
@@ -20,11 +18,9 @@ function e(string $v): string {
     return htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
 }
 
-// ambil settings (row pertama)
 $res = $conn->query("SELECT * FROM contact_settings ORDER BY id ASC LIMIT 1");
 $settings = $res ? $res->fetch_assoc() : null;
 
-// kalau belum ada row, buat 1 row kosong
 if (!$settings) {
     $conn->query("INSERT INTO contact_settings (address, phone, whatsapp, email, fax, op_hours, maps_embed)
                 VALUES ('','','','','','','')");

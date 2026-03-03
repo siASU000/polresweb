@@ -1,14 +1,12 @@
 <?php
 declare(strict_types=1);
 
-// ===== DB (WAJIB: pakai db_connection.php di ROOT project) =====
 require_once __DIR__ . '/admin/db_connection.php';
 if (!isset($conn) || !($conn instanceof mysqli)) {
   die("Koneksi database tidak valid. Pastikan db_connection.php membuat variabel \$conn (mysqli).");
 }
 $conn->set_charset("utf8mb4");
 
-// ===== Helpers =====
 function e($v): string {
   return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
 }
@@ -20,36 +18,25 @@ function normalize_wa_to_wa_me(string $whatsapp, string $default = 'https://wa.m
   $waNum = preg_replace('/[^0-9]/', '', $wa);
   if ($waNum === '') return $default;
 
-  // kalau mulai 0 -> ubah jadi 62xxxxx
   if (strpos($waNum, '0') === 0) $waNum = '62' . substr($waNum, 1);
 
   return 'https://wa.me/' . $waNum;
 }
 
-/**
- * Terima input:
- * - iframe full dari google maps
- * - URL embed (https://www.google.com/maps?...&output=embed)
- * Keluaran:
- * - iframe yang aman (hanya iframe)
- */
 function render_maps_embed(string $mapsEmbed): string {
   $mapsEmbed = trim($mapsEmbed);
   if ($mapsEmbed === '') {
     $mapsEmbed = "https://www.google.com/maps?q=Polresta%20Padang&output=embed";
   }
 
-  // jika input berupa URL, buat iframe
   if (stripos($mapsEmbed, '<iframe') === false) {
     $src = e($mapsEmbed);
     return '<iframe title="Lokasi Polresta Padang" src="' . $src . '" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>';
   }
 
-  // input berupa iframe: ambil hanya tag iframe pertama
   if (preg_match('/<iframe\b[^>]*>.*?<\/iframe>/is', $mapsEmbed, $m)) {
     $iframe = $m[0];
 
-    // pastikan ada loading + referrerpolicy (kalau belum)
     if (stripos($iframe, 'loading=') === false) {
       $iframe = preg_replace('/<iframe\b/i', '<iframe loading="lazy"', $iframe, 1);
     }
@@ -63,16 +50,13 @@ function render_maps_embed(string $mapsEmbed): string {
     return $iframe;
   }
 
-  // fallback kalau format aneh
   $src = e("https://www.google.com/maps?q=Polresta%20Padang&output=embed");
   return '<iframe title="Lokasi Polresta Padang" src="' . $src . '" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>';
 }
 
-// ===== Load settings from DB =====
 $settingsRes = $conn->query("SELECT * FROM contact_settings ORDER BY id ASC LIMIT 1");
 $settings = $settingsRes ? $settingsRes->fetch_assoc() : [];
 
-// fallback default kalau DB kosong
 $address   = $settings['address']    ?? 'Jl. Moh. Yamin, Belakang Pd., Kec. Padang Bar., Kota Padang, Sumatera Barat 25132';
 $phone     = $settings['phone']      ?? '110';
 $whatsapp  = $settings['whatsapp']   ?? '+62 811 6693 110';
@@ -81,7 +65,6 @@ $fax       = $settings['fax']        ?? '(0751) 33724';
 $opHours   = $settings['op_hours']   ?? "Senin – Jumat: 08.00 – 16.00 WIB\nSabtu – Minggu: Layanan tertentu sesuai ketentuan";
 $mapsEmbed = $settings['maps_embed'] ?? '';
 
-// WA Link auto dari whatsapp
 $waLink = normalize_wa_to_wa_me((string)$whatsapp);
 ?>
 <!DOCTYPE html>

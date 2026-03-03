@@ -1,19 +1,16 @@
 <?php
-// 1. KONEKSI DATABASE & AMBIL DATA
+
 require __DIR__ . '/admin/db_connection.php';
 
-// Ambil data dari tabel profil_settings (ID 1)
 $query = "SELECT * FROM profil_settings WHERE id = 1";
 $result = $conn->query($query);
 $p = $result->fetch_assoc();
 
-// Fungsi helper untuk keamanan output
 function e($v)
 {
   return htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
 }
 
-// Fallback jika gambar kosong
 $foto_kapolres = !empty($p['foto_kapolres']) ? 'uploads/profil/' . $p['foto_kapolres'] : 'assets/kapolres padang.jpg';
 $foto_wakapolres = !empty($p['foto_wakapolres']) ? 'uploads/profil/' . $p['foto_wakapolres'] : 'assets/wakapolres padang.jpg';
 ?>
@@ -283,7 +280,7 @@ $foto_wakapolres = !empty($p['foto_wakapolres']) ? 'uploads/profil/' . $p['foto_
 <body>
 
   <?php
-  // Pastikan file ini ada, jika tidak, kode header di bawah bisa diaktifkan
+
   if (file_exists(__DIR__ . '/partials/header.php')) {
     require __DIR__ . '/partials/header.php';
   } else {

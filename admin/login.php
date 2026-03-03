@@ -9,15 +9,12 @@ function safe_next(string $next, string $fallback): string
   if ($next === '')
     return $fallback;
 
-  // blok open redirect (URL luar)
   if (preg_match('#^(https?:)?//#i', $next))
     return $fallback;
 
-  // hanya izinkan path absolut internal
   if ($next[0] !== '/')
     return $fallback;
 
-  // batasi hanya dalam aplikasi ini (sesuaikan jika folder berbeda)
   if (stripos($next, '/webandruy/admin/') !== 0)
     return $fallback;
 
@@ -73,7 +70,6 @@ $nextValue = htmlspecialchars(safe_next($nextGet, $defaultAfterLogin), ENT_QUOTE
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Admin Login - Polresta Padang</title>
 
-  <!-- PENTING: path ini harus benar -->
   <link rel="stylesheet" href="admin.css?v=1">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -85,7 +81,7 @@ $nextValue = htmlspecialchars(safe_next($nextGet, $defaultAfterLogin), ENT_QUOTE
   <div class="login-shell">
     <div class="login-card">
       <div class="login-brand">
-        <!-- GANTI nama file logo sesuai yang kamu punya -->
+        
         <img class="login-logo" src="../assets/logo polresta padang.png" alt="Polresta Padang">
       </div>
 

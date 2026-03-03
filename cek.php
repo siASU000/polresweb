@@ -1,5 +1,5 @@
 <?php
-// File: cek.php
+
 require 'admin/db_connection.php';
 
 echo "<h3>1. Cek Koneksi Database</h3>";

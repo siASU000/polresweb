@@ -19,7 +19,6 @@ function sidebarLink(string $page, string $label, string $currentPage): string
     }
 </style>
 
-<!-- Topbar -->
 <header
     style="height:64px; background:#1f2f77; color:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 20px; position:sticky; top:0; z-index:1000; box-shadow:0 2px 8px rgba(0,0,0,0.15);">
     <div style="display:flex; gap:10px; align-items:center;">
@@ -41,10 +40,8 @@ function sidebarLink(string $page, string $label, string $currentPage): string
     </div>
 </header>
 
-<!-- Wrapper layout sidebar + konten -->
 <div style="display:flex; min-height:calc(100vh - 64px);">
 
-    <!-- Sidebar -->
     <aside
         style="width:240px; min-width:240px; background:#fff; border-right:1px solid #e6eaf5; padding:16px; position:sticky; top:64px; height:calc(100vh - 64px); overflow-y:auto; box-shadow:2px 0 6px rgba(0,0,0,0.03);">
 
@@ -66,5 +63,4 @@ function sidebarLink(string $page, string $label, string $currentPage): string
         <?= sidebarLink('kelola-footer.php', 'Kelola Footer', $currentPage) ?>
     </aside>
 
-    <!-- Main content area (di-close oleh setiap halaman dengan </main></div>) -->
     <main style="flex:1; padding:24px; overflow-x:hidden; box-sizing:border-box; background:#f4f6fb;">

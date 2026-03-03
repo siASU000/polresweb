@@ -1,8 +1,6 @@
 <?php
 header('Content-Type: application/json; charset=UTF-8');
 
-// Kalau tidak butuh CORS (karena masih localhost domain yang sama), ini boleh dihapus.
-// Tapi saya biarkan aman.
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Content-Type');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -21,7 +19,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 require __DIR__ . '/db_connection.php';
 
-// Ambil data (support JSON dan form-urlencoded)
 $rawInput = file_get_contents('php://input');
 $data = json_decode($rawInput, true);
 
@@ -41,7 +38,6 @@ if ($username === '' || $password === '' || $role === '') {
     exit();
 }
 
-// Validasi role biar tidak bisa inject role lain
 $allowedRoles = ['admin', 'editor'];
 if (!in_array($role, $allowedRoles, true)) {
     http_response_code(400);
@@ -51,7 +47,6 @@ if (!in_array($role, $allowedRoles, true)) {
 
 $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-// Cek username exist
 $query = "SELECT id FROM admin WHERE username = ? LIMIT 1";
 $stmt = $conn->prepare($query);
 if (!$stmt) {
@@ -72,7 +67,6 @@ if ($result && $result->num_rows > 0) {
 }
 $stmt->close();
 
-// Insert akun
 $query = "INSERT INTO admin (username, password, role) VALUES (?, ?, ?)";
 $stmt = $conn->prepare($query);
 if (!$stmt) {

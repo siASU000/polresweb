@@ -1,7 +1,5 @@
 <?php
-// Kalau kamu punya guard login admin, aktifkan:
-// $ALLOWED_ROLES = ['admin'];
-// require __DIR__ . '/auth_guard.php';
+
 ?>
 <!doctype html>
 <html lang="id">
@@ -13,7 +11,6 @@
 
   <link rel="stylesheet" href="admin.css" />
 
-  <!-- CSS kecil untuk memastikan layout rapi meski admin.css berbeda -->
   <style>
     /* Background full */
     body.create-account-page{

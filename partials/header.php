@@ -1,8 +1,7 @@
 <?php
-// partials/header.php
+
 require_once __DIR__ . '/helpers.php';
 
-// --- PHP LOGIC (Tidak Berubah) ---
 $hsRes = $conn->query("SELECT * FROM header_settings ORDER BY id ASC LIMIT 1");
 $hs = $hsRes ? $hsRes->fetch_assoc() : [];
 
@@ -43,7 +42,7 @@ foreach ($byId as $id => $item) {
 $currentPath = trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/');
 $segments = explode('/', $currentPath);
 $current = end($segments);
-// Remove .php extension for matching
+
 $current = preg_replace('/\.php$/', '', $current);
 if ($current === '' || $current === 'webandruy')
   $current = 'index';
@@ -424,7 +423,6 @@ if ($current === '' || $current === 'webandruy')
   </div>
 </header>
 
-<!-- MOBILE SIDEBAR -->
 <div class="mobile-sidebar-overlay" id="sidebarOverlay"></div>
 <aside class="mobile-sidebar" id="mobileSidebar">
   <div class="sidebar-top">

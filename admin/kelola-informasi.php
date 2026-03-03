@@ -25,8 +25,6 @@ if (!is_dir($uploadDir)) {
 $flash = "";
 $err = "";
 
-/** LOGIC PHP TETAP SAMA (TIDAK ADA YANG DIHAPUS) **/
-/** Helpers upload */
 function saveUpload(array $file, string $uploadDir): array
 {
   if (empty($file['name']) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
@@ -35,7 +33,8 @@ function saveUpload(array $file, string $uploadDir): array
   if (($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
     return ['ok' => false, 'msg' => 'Upload gagal.'];
   }
-  $max = 4 * 1024 * 1024; // 4MB
+  $max = 4 * 1024 * 1024; 
+
   if (($file['size'] ?? 0) > $max) {
     return ['ok' => false, 'msg' => 'Ukuran file maksimal 4MB.'];
   }
@@ -58,7 +57,6 @@ function saveUpload(array $file, string $uploadDir): array
   return ['ok' => true, 'name' => $safeName];
 }
 
-/** Hapus 1 item */
 if (($_POST['action'] ?? '') === 'delete') {
   $id = (int) ($_POST['id'] ?? 0);
   $stmt = $conn->prepare("SELECT gambar FROM informasi WHERE id=?");
@@ -79,7 +77,6 @@ if (($_POST['action'] ?? '') === 'delete') {
   $flash = "Data berhasil dihapus.";
 }
 
-/** Update urutan massal */
 if (($_POST['action'] ?? '') === 'save_order') {
   $orders = $_POST['urutan'] ?? [];
   if (is_array($orders)) {
@@ -95,7 +92,6 @@ if (($_POST['action'] ?? '') === 'save_order') {
   }
 }
 
-/** Toggle aktif */
 if (($_POST['action'] ?? '') === 'toggle') {
   $id = (int) ($_POST['id'] ?? 0);
   $to = (int) ($_POST['to'] ?? 0);
@@ -106,7 +102,6 @@ if (($_POST['action'] ?? '') === 'toggle') {
   $flash = "Status berhasil diperbarui.";
 }
 
-/** Add new */
 if (($_POST['action'] ?? '') === 'add') {
   $kategori = trim((string) ($_POST['kategori'] ?? 'dpo'));
   if (!in_array($kategori, ['dpo', 'orang_hilang', 'lainnya'], true))
@@ -147,7 +142,6 @@ if (($_POST['action'] ?? '') === 'add') {
   }
 }
 
-/** Load list */
 $list = [];
 $rs = $conn->query("SELECT * FROM informasi ORDER BY kategori ASC, urutan ASC, created_at DESC, id DESC");
 if ($rs) {

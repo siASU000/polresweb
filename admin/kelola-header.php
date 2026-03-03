@@ -1,5 +1,5 @@
 <?php
-// admin/kelola-header.php
+
 declare(strict_types=1);
 
 $ALLOWED_ROLES = ['admin', 'editor'];
@@ -13,7 +13,6 @@ function e(string $v): string
 
 $flash = null;
 
-// save settings
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_settings') {
   $logo = trim($_POST['logo_path'] ?? 'assets/Logo Polresta Padang.png');
   $search = isset($_POST['search_enabled']) ? 1 : 0;
@@ -29,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_
   $flash = ['type' => 'ok', 'msg' => 'Header settings tersimpan.'];
 }
 
-// add menu
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_menu') {
   $parent = (int) ($_POST['parent_id'] ?? 0);
   $parentId = $parent > 0 ? $parent : null;
@@ -42,15 +40,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_m
     $flash = ['type' => 'err', 'msg' => 'Label & URL wajib diisi.'];
   } else {
     $stmt = $conn->prepare("INSERT INTO header_menu (parent_id,label,url,sort_order,is_active) VALUES (?,?,?,?,1)");
-    // bind_param tidak bisa langsung nullable int, jadi pakai trick:
+
     if ($parentId === null) {
       $null = null;
-      $stmt->bind_param("isss", $null, $label, $url, $sort); // ini bakal warning
+      $stmt->bind_param("isss", $null, $label, $url, $sort); 
+
     }
   }
 }
 
-// INSERT nullable yang aman:
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_menu') {
   $parent = (int) ($_POST['parent_id'] ?? 0);
   $label = trim($_POST['label'] ?? '');
@@ -73,7 +71,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_m
   }
 }
 
-// delete menu
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_menu') {
   $id = (int) ($_POST['id'] ?? 0);
   if ($id > 0) {
@@ -85,7 +82,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
   }
 }
 
-// toggle active
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toggle_menu') {
   $id = (int) ($_POST['id'] ?? 0);
   $val = (int) ($_POST['val'] ?? 1);

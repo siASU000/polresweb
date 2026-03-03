@@ -111,7 +111,6 @@ require __DIR__ . "/auth_guard.php";
     </div>
   </section>
 
-  <!-- Bagian bawah "kategori/search/footer" yang tidak relevan sengaja dihilangkan -->
   </main>
   </div>
 

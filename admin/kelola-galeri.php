@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1);
 
-$ALLOWED_ROLES = ['admin','editor']; // atau ['admin'] saja
+$ALLOWED_ROLES = ['admin','editor']; 
+
 require __DIR__ . '/auth_guard.php';
 
 ini_set('display_errors', '1');
@@ -16,14 +17,14 @@ $conn->set_charset('utf8mb4');
 function h(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 
 $uploadDir = __DIR__ . '/../uploads/galeri/';
-$uploadBase = 'uploads/galeri/'; // untuk dipakai di <img src="">
+$uploadBase = 'uploads/galeri/'; 
+
 if (!is_dir($uploadDir)) {
   @mkdir($uploadDir, 0775, true);
 }
 
 $flash = ['ok' => '', 'err' => ''];
 
-/** Ambil data galeri */
 function fetchGaleri(mysqli $conn): array {
   $data = [];
   $sql = "SELECT id, judul, deskripsi, gambar, alt_text, is_active, urutan, created_at
@@ -37,7 +38,6 @@ function fetchGaleri(mysqli $conn): array {
   return $data;
 }
 
-/** Validasi ekstensi & mimetype gambar */
 function validateImageUpload(array $file, string &$err): bool {
   if (!isset($file['error']) || is_array($file['error'])) {
     $err = "Upload tidak valid.";
@@ -47,7 +47,8 @@ function validateImageUpload(array $file, string &$err): bool {
     $err = "Upload gagal. Kode error: " . (string)$file['error'];
     return false;
   }
-  if (($file['size'] ?? 0) > 4 * 1024 * 1024) { // 4MB
+  if (($file['size'] ?? 0) > 4 * 1024 * 1024) { 
+
     $err = "Ukuran file terlalu besar. Maks 4MB.";
     return false;
   }
@@ -72,13 +73,11 @@ function validateImageUpload(array $file, string &$err): bool {
   return true;
 }
 
-/** Generate nama file aman */
 function makeSafeFilename(string $ext): string {
   $rand = bin2hex(random_bytes(8));
   return 'galeri_' . date('Ymd_His') . '_' . $rand . '.' . $ext;
 }
 
-/** Hapus file fisik jika ada */
 function deletePhysicalFile(string $absPath): void {
   if ($absPath && file_exists($absPath) && is_file($absPath)) {
     @unlink($absPath);
@@ -87,9 +86,6 @@ function deletePhysicalFile(string $absPath): void {
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
-/* ==========================
-    HANDLE ACTIONS
-========================== */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if ($action === 'create') {
     $judul = trim((string)($_POST['judul'] ?? ''));

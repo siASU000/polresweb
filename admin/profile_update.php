@@ -17,7 +17,6 @@ if (!$userId) {
   exit;
 }
 
-// Ambil field sesuai dashboard.php (name attribute)
 $nama    = trim($_POST['nama'] ?? '');
 $nrp     = trim($_POST['nrp'] ?? '');
 $email   = trim($_POST['email'] ?? '');
@@ -25,7 +24,6 @@ $no_hp   = trim($_POST['no_hp'] ?? '');
 $jabatan = trim($_POST['jabatan'] ?? '');
 $alamat  = trim($_POST['alamat'] ?? '');
 
-// Validasi angka: NRP & No HP hanya digit
 if ($nrp !== '' && !ctype_digit($nrp)) {
   http_response_code(400);
   echo json_encode(['status' => 'error', 'message' => 'NRP harus angka saja.']);
@@ -37,7 +35,6 @@ if ($no_hp !== '' && !ctype_digit($no_hp)) {
   exit;
 }
 
-// Update tabel admin (sesuaikan nama kolom dengan tabel Anda)
 $sql = "UPDATE admin
         SET nama = ?, nrp = ?, email = ?, no_hp = ?, jabatan = ?, alamat = ?
         WHERE id = ?";

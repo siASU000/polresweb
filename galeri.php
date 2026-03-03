@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
 
-// 1. KONEKSI & SETTINGS
 require __DIR__ . '/admin/db_connection.php';
 
 if (!isset($conn) || !($conn instanceof mysqli)) {
@@ -15,7 +14,6 @@ function h(string $s): string {
 
 $uploadBase = 'uploads/galeri/';
 
-// 2. AMBIL DATA GALERI
 $items = [];
 $sql = "SELECT id, judul, deskripsi, gambar 
         FROM galeri 
@@ -173,7 +171,7 @@ if ($rs) {
                     </div>
                 <?php else: ?>
                     <?php foreach ($items as $g): 
-                        // Cek file gambar
+
                         $imgPath = !empty($g['gambar']) ? ($uploadBase . $g['gambar']) : 'assets/placeholder.jpg';
                     ?>
                         <article class="galeri-card">

@@ -1,27 +1,23 @@
 <?php
-// admin/kelola-berita.php
+
 declare(strict_types=1);
 
 ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
 
-// === 1. AUTH GUARD ===
 $ALLOWED_ROLES = ['admin', 'editor'];
 require __DIR__ . '/auth_guard.php';
 
-// === 2. DATABASE CONNECTION ===
 require __DIR__ . '/db_connection.php';
 if (!isset($conn) || !($conn instanceof mysqli)) {
     die("Koneksi database tidak valid. Pastikan db_connection.php menghasilkan \$conn.");
 }
 $conn->set_charset('utf8mb4');
 
-// === 3. KONFIGURASI ===
 $KATEGORI_LIST = ['Lalu Lintas', 'Kriminal', 'Humas', 'SDM'];
 $DISPLAY_OPTS = ['Tampilan Berita Utama', 'Berita Terkini', 'Berita Populer'];
 
-// === 4. HELPERS ===
 function h(string $s): string
 {
     return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
@@ -32,7 +28,6 @@ function redirect(string $url): void
     exit;
 }
 
-// Deteksi kolom nama pada tabel editor agar tidak error
 function detectEditorLabelField(mysqli $conn): string
 {
     $fieldsPriority = ['nama_lengkap', 'nama', 'full_name', 'username', 'email'];
@@ -48,7 +43,8 @@ function detectEditorLabelField(mysqli $conn): string
         if (in_array($f, $cols, true))
             return $f;
     }
-    return 'id'; // fallback jika tidak ketemu
+    return 'id'; 
+
 }
 
 function fetchEditorsMap(mysqli $conn): array
@@ -89,7 +85,6 @@ function handleUpload(?array $file, string $destDir): ?string
     return $newName;
 }
 
-// Generate SEO-friendly slug from title
 function generateSlug(string $title): string
 {
     $slug = strtolower(trim($title));
@@ -121,7 +116,6 @@ function ensureUniqueSlug(mysqli $conn, string $baseSlug, int $excludeId = 0): s
     return $slug;
 }
 
-// === 5. ROUTING & SETUP ===
 $mode = $_GET['mode'] ?? 'list';
 $id = (int) ($_GET['id'] ?? 0);
 $beritaUploadDir = realpath(__DIR__ . '/../uploads') . DIRECTORY_SEPARATOR . 'berita';
@@ -129,12 +123,12 @@ $beritaUploadUrl = '../uploads/berita/';
 $flashError = '';
 $flashOk = '';
 
-// === 6. PROSES ACTIONS (POST) ===
 try {
-    // CREATE
+
     if ($mode === 'create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $judul = trim($_POST['judul'] ?? '');
-        $isi = $_POST['isi'] ?? ''; // Jangan trim berlebihan agar tag HTML terjaga
+        $isi = $_POST['isi'] ?? ''; 
+
         $tanggal = $_POST['tanggal'] ?? date('Y-m-d');
         $display = $_POST['display_category'] ?? 'Tampilan Berita Utama';
 
@@ -157,10 +151,10 @@ try {
         redirect('kelola-berita.php?ok=created');
     }
 
-    // EDIT
     if ($mode === 'edit' && $id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $judul = trim($_POST['judul'] ?? '');
-        $isi = $_POST['isi'] ?? ''; // TinyMCE mengirimkan data HTML ke sini
+        $isi = $_POST['isi'] ?? ''; 
+
         $tanggal = $_POST['tanggal'] ?? '';
         $display = $_POST['display_category'] ?? 'Tampilan Berita Utama';
 
@@ -193,7 +187,6 @@ try {
         redirect('kelola-berita.php?ok=updated');
     }
 
-    // DELETE
     if ($mode === 'delete' && $id > 0) {
         $q = $conn->query("SELECT gambar FROM berita WHERE id=$id");
         if ($q && $row = $q->fetch_assoc()) {
@@ -208,7 +201,6 @@ try {
     $flashError = $e->getMessage();
 }
 
-// === 7. AMBIL DATA UNTUK VIEW ===
 if (isset($_GET['ok'])) {
     $msgs = [
         'created' => 'Berita berhasil ditambahkan.',

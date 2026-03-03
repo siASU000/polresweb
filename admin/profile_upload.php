@@ -1,5 +1,5 @@
 <?php
-// admin/profile_upload.php
+
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -20,7 +20,7 @@ if (!isset($_FILES['foto']) || $_FILES['foto']['error'] !== UPLOAD_ERR_OK) {
 }
 
 $allowedExt = ['jpg', 'jpeg', 'png', 'webp'];
-$maxSize = 2 * 1024 * 1024; // 2MB
+$maxSize = 2 * 1024 * 1024; 
 
 $tmpName = $_FILES['foto']['tmp_name'];
 $origName = $_FILES['foto']['name'];
@@ -60,7 +60,6 @@ if (!move_uploaded_file($tmpName, $targetPath)) {
   exit();
 }
 
-// path yang disimpan ke DB (relative dari project)
 $dbPath = "uploads/admin/" . $newName;
 
 $stmt = $conn->prepare("UPDATE admin SET foto = ? WHERE id = ?");

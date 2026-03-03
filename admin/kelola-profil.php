@@ -1,5 +1,5 @@
 <?php
-// admin/kelola-profil.php
+
 declare(strict_types=1);
 
 $ALLOWED_ROLES = ['admin', 'editor'];
@@ -9,11 +9,9 @@ require __DIR__ . '/db_connection.php';
 function e($v): string { return htmlspecialchars((string)($v ?? ''), ENT_QUOTES, 'UTF-8'); }
 $flash = null;
 
-// 1. AMBIL DATA SAAT INI
 $res = $conn->query("SELECT * FROM profil_settings WHERE id=1");
 $p = $res ? $res->fetch_assoc() : [];
 
-// 2. PROSES UPDATE SAAT TOMBOL SIMPAN DIKLIK
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama_kapolres = trim($_POST['nama_kapolres'] ?? '');
     $nama_wakapolres = trim($_POST['nama_wakapolres'] ?? '');
@@ -21,17 +19,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $misi = trim($_POST['misi'] ?? '');
     $sejarah = trim($_POST['sejarah'] ?? '');
     $struktur = trim($_POST['struktur_organisasi'] ?? '');
-    
-    // PERBAIKAN LOGIKA FOLDER: Menggunakan path absolut yang lebih aman
+
     $rootPath = dirname(__DIR__); 
     $uploadDir = $rootPath . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'profil';
-    
-    // Jika path exists tapi bukan directory (file), hapus dulu
+
     if (file_exists($uploadDir) && !is_dir($uploadDir)) {
         @unlink($uploadDir);
     }
-    
-    // Buat folder jika belum ada
+
     if (!is_dir($uploadDir)) {
         if (!@mkdir($uploadDir, 0777, true)) {
             $flash = ['type'=>'danger', 'msg'=>'Gagal membuat folder upload. Periksa permission folder uploads/'];
@@ -40,7 +35,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     $uploadDir .= DIRECTORY_SEPARATOR;
 
-    // Proses Foto Kapolres
     $foto_kapolres = $p['foto_kapolres'] ?? '';
     if (!empty($_FILES['f_kapolres']['name']) && $_FILES['f_kapolres']['error'] === UPLOAD_ERR_OK) {
         $ext = pathinfo($_FILES['f_kapolres']['name'], PATHINFO_EXTENSION);
@@ -52,7 +46,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Proses Foto Wakapolres
     $foto_wakapolres = $p['foto_wakapolres'] ?? '';
     if (!empty($_FILES['f_wakapolres']['name']) && $_FILES['f_wakapolres']['error'] === UPLOAD_ERR_OK) {
         $ext = pathinfo($_FILES['f_wakapolres']['name'], PATHINFO_EXTENSION);
@@ -71,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if ($stmt->execute()) {
         $flash = ['type'=>'success', 'msg'=>'Profil Berhasil Diperbarui!'];
-        // Refresh data setelah update
+
         $res = $conn->query("SELECT * FROM profil_settings WHERE id=1");
         $p = $res->fetch_assoc();
     } else {

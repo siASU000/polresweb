@@ -1,10 +1,8 @@
 <?php
-require __DIR__ . '/auth_guard.php'; // Pastikan pengguna sudah login
+require __DIR__ . '/auth_guard.php'; 
 
-// Koneksi ke database
 require __DIR__ . '/db_connection.php';
 
-// Ambil data user yang sedang login
 $userId = $_SESSION['admin_id'];
 $query = "SELECT * FROM admin WHERE id = ?";
 $stmt = $conn->prepare($query);
@@ -34,9 +32,8 @@ $userData = $result->fetch_assoc();
 
 <body class="admin-profile-page">
 
-  <!-- Menu Navigasi -->
   <nav>
-    <!-- Kamu bisa menambahkan link ke halaman lain di sini -->
+    
     <ul>
       <li><a href="dashboard.php">Dashboard</a></li>
       <li><a href="kelola-home.php">Kelola Home</a></li>
@@ -51,7 +48,6 @@ $userData = $result->fetch_assoc();
   <div class="profile-container">
     <h1>Profil Saya</h1>
 
-    <!-- Tampilkan Data Profil Admin -->
     <div class="profile-card">
       <img src="<?php echo !empty($userData['foto']) ? '../' . htmlspecialchars($userData['foto']) : '../assets/default-avatar.png'; ?>" alt="Foto Profil" class="profile-img" id="profileImage">
       

@@ -43,7 +43,6 @@ if (strlen($new) < 8) {
   exit;
 }
 
-// Ambil password hash lama dari DB
 $stmt = $conn->prepare("SELECT password FROM admin WHERE id = ? LIMIT 1");
 $stmt->bind_param("i", $userId);
 $stmt->execute();
@@ -58,14 +57,12 @@ if ($res->num_rows === 0) {
 $row = $res->fetch_assoc();
 $hash = $row['password'] ?? '';
 
-// Verifikasi password lama
 if (!password_verify($old, $hash)) {
   http_response_code(400);
   echo json_encode(['status' => 'error', 'message' => 'Password lama salah.']);
   exit;
 }
 
-// Update password baru
 $newHash = password_hash($new, PASSWORD_DEFAULT);
 
 $up = $conn->prepare("UPDATE admin SET password = ? WHERE id = ?");

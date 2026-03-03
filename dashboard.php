@@ -1,17 +1,15 @@
 <?php
-// Declare strict types and enable error reporting
+
 declare(strict_types=1);
 ini_set('display_errors', '1');
 error_reporting(E_ALL);
 
-// Connect to the database
 require __DIR__ . '/admin/db_connection.php';
 if (!isset($conn) || !($conn instanceof mysqli)) {
   die("Koneksi database tidak valid. Pastikan admin/db_connection.php menghasilkan \$conn (mysqli).");
 }
 $conn->set_charset('utf8mb4');
 
-// Function to escape HTML output
 function h(string $s): string
 {
   return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
@@ -19,7 +17,6 @@ function h(string $s): string
 
 $uploadBase = 'uploads/berita/';
 
-// 1. QUERY BERITA TERKINI (Hanya yang diset Berita Terkini)
 $beritaTerkini = [];
 $sqlTerkini = "SELECT id, judul, slug, gambar FROM berita 
                WHERE display_category = 'Berita Terkini' 
@@ -31,7 +28,6 @@ if ($rsTerkini) {
   $rsTerkini->free();
 }
 
-// 2. QUERY BERITA POPULER (Hanya yang diset Berita Populer)
 $beritaPopuler = [];
 $sqlPopuler = "SELECT id, judul, slug, gambar, tanggal FROM berita 
                WHERE display_category = 'Berita Populer' 
@@ -43,8 +39,6 @@ if ($rsPopuler) {
   $rsPopuler->free();
 }
 
-// 3. QUERY KATEGORI (Hanya dari Tampilan Berita Utama)
-// Kita buat fungsi agar query kategori lebih rapi dan tidak duplikat di Terkini
 function getBeritaByKategori($conn, $kategori)
 {
   $sql = "SELECT id, judul, slug, isi, tanggal, gambar, kategori 
@@ -241,7 +235,8 @@ function getBeritaByKategori($conn, $kategori)
           <h3>SDM</h3>
           <div class="grid-lainnya">
             <?php
-            $res = getBeritaByKategori($conn, 'SDM'); // Pastikan parameter sesuai database (SDM besar)
+            $res = getBeritaByKategori($conn, 'SDM'); 
+
             while ($row = $res->fetch_assoc()):
               $img = !empty($row['gambar']) ? ($uploadBase . $row['gambar']) : 'assets/default.jpg';
               ?>
@@ -265,7 +260,6 @@ function getBeritaByKategori($conn, $kategori)
 
       <a href="berita" class="btn-all-link">Lihat Semua Berita</a>
     </div>
-
 
     <aside class="sidebar-pimpinan">
       <div class="sidebar-card">
@@ -291,7 +285,7 @@ function getBeritaByKategori($conn, $kategori)
         <h3>BERITA POPULER</h3>
         <div class="berita-populer-list">
           <?php
-          // Ambil maksimal 3 berita saja agar tidak terlalu panjang ke bawah
+
           $count = 0;
           foreach ($beritaPopuler as $bp):
             if ($count >= 3)

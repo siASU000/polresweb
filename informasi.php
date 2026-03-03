@@ -66,18 +66,15 @@ function tipeLabel(?string $t): string
 
   <main class="informasi-wrap">
 
-
-    <!-- DPO & Orang Hilang 2 Column Grid -->
     <div class="two-column-grid">
 
-      <!-- DPO -->
       <section id="dpo" class="info-section" style="margin-top:0;">
         <div class="info-header">
           <h2>DPO (Daftar Pencarian Orang)</h2>
           <p>Daftar orang yang sedang dalam pencarian.</p>
         </div>
 
-        <div class="info-grid" style="grid-template-columns: 1fr;"> <!-- Override to 1 column inside grid -->
+        <div class="info-grid" style="grid-template-columns: 1fr;"> 
           <?php if (count($dpo) === 0): ?>
             <p class="info-empty">Belum ada data DPO.</p>
           <?php else: ?>
@@ -122,14 +119,13 @@ function tipeLabel(?string $t): string
         </div>
       </section>
 
-      <!-- Orang Hilang -->
       <section id="orang-hilang" class="info-section" style="margin-top:0;">
         <div class="info-header">
           <h2>Orang Hilang</h2>
           <p>Informasi orang hilang.</p>
         </div>
 
-        <div class="info-grid" style="grid-template-columns: 1fr;"> <!-- Override to 1 column inside grid -->
+        <div class="info-grid" style="grid-template-columns: 1fr;"> 
           <?php if (count($oh) === 0): ?>
             <p class="info-empty">Belum ada data Orang Hilang.</p>
           <?php else: ?>
@@ -176,8 +172,6 @@ function tipeLabel(?string $t): string
 
     </div>
 
-
-    <!-- Informasi Lainnya -->
     <section id="informasi-lainnya" class="info-section">
       <div class="info-header">
         <h2>Informasi Lainnya</h2>
